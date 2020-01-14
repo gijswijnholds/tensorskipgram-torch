@@ -51,8 +51,5 @@ class MatrixSkipgram(torch.nn.Module):
         batch_dot = torch.sum(funcarg_vecs * context_vecs, dim=1)
         return batch_dot
 
-
-loss_fn = torch.nn.BCEWithLogitsLoss()
-
 # nounMatrix = torch.rand(50,100)
 # myMatSG = MatrixSkipgram(50, 10, 20, 100, nounMatrix)

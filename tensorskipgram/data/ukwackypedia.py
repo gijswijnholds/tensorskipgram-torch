@@ -1,7 +1,10 @@
 import os
+import multiprocessing as mp
+from multiprocessing import Pool
 from typing import Tuple, List, Callable, Optional
 from tqdm import tqdm
 from tensorskipgram.data.util import dump_obj_fn
+from collections import Counter
 
 
 class UKWackypedia(object):
@@ -9,11 +12,9 @@ class UKWackypedia(object):
         self.file_list = self.load_file_list(root_folder)
         self.transform = transform
         self.reduce = reduce
-
     def load_file_list(self, folder):
         # folder should be /import/gijs-shared/gijs/corpora/ukwackypedia_split
         return [os.path.join(folder, fn) for fn in os.listdir(folder)]
-
     def parse_file(self, fn: str):
         print("Opening file...")
         all_text = open(fn, 'r', encoding='utf-8').read()
@@ -28,15 +29,20 @@ class UKWackypedia(object):
                 final_sents = [w for s in final_sents for w in s]
         print("Done parsing file!")
         return final_sents
+    def parse_all_files(self, num_workers: int, multi: bool = False):
+        if multi:
+            pool = mp.Pool(num_workers)
+            all_results = pool.map(self.parse_file, self.file_list)
+            all_results_flat = [r for rs in all_results for r in rs]
+            return all_results_flat
+        else:
+            all_results = []
+            num_fn = len(self.file_list)
+            for i, fn in enumerate(self.file_list):
+                print(f'Processing file {i}/{num_fn}...')
+                all_results.append(self.parse_file(fn))
+            return all_results
 
-    def parse_all_files(self):
-        all_results = []
-        num_fn = len(self.file_list)
-        for i, fn in enumerate(self.file_list):
-            print(f'Processing file {i}/{num_fn}...')
-            all_results.append(self.parse_file(fn))
-            num_results = len(all_results)
-        return all_results
 
 def parse_sentence_base(s: str):
     return [tuple(wls.split('\t')) for wls in s.strip().split('\n')]
@@ -63,5 +69,7 @@ def get_verb_args(s: str):
 my_verb_corpus = UKWackypedia('/import/gijs-shared/gijs/corpora/ukwackypedia_split',
                               transform=get_verb_args, reduce=True)
 test_fn = my_verb_corpus.file_list[0]
-all_vargs = my_verb_corpus.parse_all_files()
-dump_obj_fn(all_vargs, 'verb_counts.p')
+all_vargs = my_verb_corpus.parse_all_files(multi=True)
+all_vargs_dict = dict(Counter(all_vargs))
+dump_obj_fn(all_vargs_dict,
+            '/import/gijs-shared/gijs/verb_data/verb_counts_all_corpus_verbs.p')

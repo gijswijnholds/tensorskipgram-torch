@@ -17,7 +17,6 @@ def createNounMatrix(index2word):
         vec = np.array([float(b) for b in ln[1:]])
         space[key] = vec
     lower2upper = load_obj_fn('/import/gijs-shared/gijs/skipprob_data/lower2upper.pkl')
-
     nounMatrix = np.zeros((len(index2word), 100))
     print("Filling noun matrix...")
     for i in range(len(index2word)):

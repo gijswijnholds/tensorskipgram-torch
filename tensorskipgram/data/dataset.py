@@ -4,6 +4,7 @@ import numpy as np
 from typing import Tuple, List
 from torch import LongTensor
 from torch.utils.data import Dataset, DataLoader
+from tensorskipgram.data.util import load_obj_fn
 
 
 def createNounMatrix(index2word):
@@ -15,9 +16,7 @@ def createNounMatrix(index2word):
         key = ln[0]
         vec = np.array([float(b) for b in ln[1:]])
         space[key] = vec
-
-    with open('/import/gijs-shared/gijs/skipprob_data/lower2upper.pkl', 'rb') as f:
-        lower2upper = pickle.load(f)
+    lower2upper = load_obj_fn('/import/gijs-shared/gijs/skipprob_data/lower2upper.pkl')
 
     nounMatrix = np.zeros((len(index2word), 100))
     print("Filling noun matrix...")
@@ -32,10 +31,8 @@ def loadArgAnalysers():
     subj_preprocFileName = '/import/gijs-shared/gijs/skipprob_data/preproc_sick_subj.pkl'
     obj_preprocFileName = '/import/gijs-shared/gijs/skipprob_data/preproc_sick_obj.pkl'
     print("Loading preprocs...")
-    with open(subj_preprocFileName, 'rb') as f:
-        subj_preproc = pickle.load(f)
-    with open(obj_preprocFileName, 'rb') as g:
-        obj_preproc = pickle.load(g)
+    subj_preproc = load_obj_fn(subj_preprocFileName)
+    obj_preproc = load_obj_fn(obj_preprocFileName)
 
     subj_i2w, subj_w2i, subj_i2c, subj_i2ns = (subj_preproc['index2word'],
                                                subj_preproc['word2index'],

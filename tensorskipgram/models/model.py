@@ -4,7 +4,7 @@ from torch.nn import Embedding
 
 
 class Skipgram(torch.nn.Module):
-    def __init__(self, vocab_size:int, context_vocab_size:int, embed_size:int):
+    def __init__(self, vocab_size: int, context_vocab_size: int, embed_size: int):
         super(Skipgram, self).__init__()
         self.target_embedding = Embedding(vocab_size, embed_size)
         self.context_embedding = Embedding(context_vocab_size, embed_size)
@@ -19,6 +19,7 @@ class Skipgram(torch.nn.Module):
         context_vecs = self.context_embedding(X_context)
         batch_dot = torch.sum(target_vecs * context_vecs, dim=1)
         return batch_dot
+
 
 class MatrixSkipgram(torch.nn.Module):
     def __init__(self, noun_vocab_size: int, functor_vocab_size: int,

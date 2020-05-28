@@ -91,5 +91,3 @@ if __name__ == '__main__':
     dump_obj_fn(all_verbs_dict,
                 os.path.join(my_folder,
                              'verb_data/verb_counts_all_corpus_verbs_dict.p'))
-    # dump_obj_fn(all_vargs_dict,
-    #             '/import/gijs-shared/gijs/verb_data/verb_counts_all_corpus_verbs.p')

@@ -6,7 +6,7 @@ def dump_obj_fn(obj, fn):
         pickle.dump(obj, out_file)
 
 
-def load_obj_fn(obj, fn):
+def load_obj_fn(fn):
     with open(fn, 'rb') as in_file:
         data = pickle.load(in_file)
     return data

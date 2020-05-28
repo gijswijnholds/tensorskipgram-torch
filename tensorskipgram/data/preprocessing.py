@@ -14,6 +14,7 @@ def load_nouns(space_fn):
 def load_verbs(verbs_fn):
     with open(verbs_fn, 'r') as file:
         verbs = [ln.strip() for ln in file.readlines()]
+    return
 
 
 def load_verb_counts(verb_dict_fn, verbs, nouns):

@@ -1,5 +1,6 @@
 import torch
 import pickle
+from tqdm import tqdm
 import numpy as np
 from typing import Tuple, List
 from torch import LongTensor
@@ -62,15 +63,20 @@ class SkipgramDataset(Dataset):
 
 class MatrixSkipgramDataset(Dataset):
     def __init__(self, data_filename: str, arg: str, negk: int) -> None:
-        assert data_filename.endswith('.npy')
+        if data_filename.endswith('.npy'):
+            print("Loading data...")
+            data = np.load(data_filename, encoding='latin1').T
+        elif data_filename.endswith('.p'):
+            print("Loading data...")
+            data = load_obj_fn(data_filename).T
+        print("Preparing data in PyTorch format...")
         assert arg in ['subject', 'object']
-        print("Loading data...")
-        data = np.load(data_filename, encoding='latin1').T
         if arg == 'subject':  # objects are fixed nouns
-            self.X_contexts, self.X_funcs, self.X_args, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), data))
+            self.X_contexts, self.X_funcs, self.X_args, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), tqdm(data)))
         if arg == 'object':  # subjects are fixed nouns (X_args)
-            self.X_args, self.X_funcs, self.X_contexts, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), data))
+            self.X_args, self.X_funcs, self.X_contexts, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), tqdm(data)))
         self.batchidx = negk+1
+        print("Done preparing data!")
 
     def __len__(self) -> int:
         return int(len(self.X_args) / self.batchidx)
@@ -85,30 +91,30 @@ class MatrixSkipgramDataset(Dataset):
 sick_data_fn_subj = "/import/gijs-shared/gijs/skipprob_data/training_data_sick_subject/train_data_proper_asym_ns=5.npy"
 sick_data_fn_obj = "/import/gijs-shared/gijs/skipprob_data/training_data_sick_object/train_data_proper_asym_ns=5.npy"
 
-subjDataset = MatrixSkipgramDataset(sick_data_fn_subj, arg='subject', negk=5)
+# subjDataset = MatrixSkipgramDataset(sick_data_fn_subj, arg='subject', negk=5)
 # objDataset = MatrixSkipgramDataset(sick_data_fn_obj, arg='object')
 
-subj_dataloader6 = DataLoader(subjDataset,
-                              shuffle=True,
-                              batch_size=1)
+# subj_dataloader6 = DataLoader(subjDataset,
+#                               shuffle=True,
+#                               batch_size=1)
+#
+# subj_dataloader48 = DataLoader(subjDataset,
+#                                shuffle=True,
+#                                batch_size=8)
+#
+# subj_dataloader96 = DataLoader(subjDataset,
+#                                shuffle=True,
+#                                batch_size=16)
+#
+# subj_dataloader96 = DataLoader(subjDataset,
+#                                shuffle=True,
+#                                batch_size=64)
+# print("Loading analysers...")
+# (subj_i2w, subj_w2i, subj_i2c, subj_i2ns,
+#  obj_i2w, obj_w2i, obj_i2c, obj_i2ns) = \
+#     loadArgAnalysers()
 
-subj_dataloader48 = DataLoader(subjDataset,
-                               shuffle=True,
-                               batch_size=8)
-
-subj_dataloader96 = DataLoader(subjDataset,
-                               shuffle=True,
-                               batch_size=16)
-
-subj_dataloader96 = DataLoader(subjDataset,
-                               shuffle=True,
-                               batch_size=64)
-print("Loading analysers...")
-(subj_i2w, subj_w2i, subj_i2c, subj_i2ns,
- obj_i2w, obj_w2i, obj_i2c, obj_i2ns) = \
-    loadArgAnalysers()
-
-noun_vocab_size = len(obj_i2w)
-context_vocab_size = len(subj_i2w)
-nounMatrix = createNounMatrix(obj_i2w)
-nounMatrix = torch.tensor(nounMatrix, dtype=torch.float32)
+# noun_vocab_size = len(obj_i2w)
+# context_vocab_size = len(subj_i2w)
+# nounMatrix = createNounMatrix(obj_i2w)
+# nounMatrix = torch.tensor(nounMatrix, dtype=torch.float32)

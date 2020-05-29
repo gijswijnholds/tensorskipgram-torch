@@ -1,12 +1,8 @@
 import os
+import nltk
 from tqdm import tqdm
 from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
 
-
-space_fn = '/import/gijs-shared/gijs/spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt'
-verb_dict_fn = '/import/gijs-shared/gijs/verb_data/verb_counts_all_corpus_verbs_dict.p'
-verbs_fn = '/import/gijs-shared/gijs/verb_data/sick_verbs_full.txt'
-preproc_fn = '/import/gijs-shared/gijs/verb_data/preproc_sick_verbcounts.p'
 
 def load_nouns(space_fn):
     with open(space_fn, 'r') as file:
@@ -20,14 +16,21 @@ def load_verbs(verbs_fn):
     return verbs
 
 
-def load_verb_counts(verb_dict_fn, verbs, nouns):
+def load_stopwords():
+    return set(nltk.corpus.stopwords.words('english') + ['cannot'])
+
+
+def load_verb_counts(verb_dict_fn, verbs, nouns, stopwords):
     print("Opening verb counts...")
     verb_dict = load_obj_fn(verb_dict_fn)
     print("Filtering verb counts...")
     verb_dict_out = {v: {(s, o): verb_dict[v][(s, o)]
                          for (s, o) in verb_dict[v]
-                         if s in nouns and o in nouns}
+                         if s in nouns and o in nouns
+                         and s not in stopwords and o not in stopwords}
                      for v in tqdm(verbs) if v in verb_dict}
+    # print("Consolidating upper/lowercase counts...Filtering verb counts...")
+    # TODO
     return verb_dict_out
 
 
@@ -60,13 +63,15 @@ class Preprocessor(object):
             self.preproc = load_obj_fn(preproc_fn)
         else:
             print("Preprocessing has not been done, please run setup.")
+            self.preproc = None
 
     def setup(self):
         nouns = load_nouns(self.space_fn)
         check_nouns = set(nouns + [n.lower() for n in nouns])
-        i2v = sorted(load_verbs(verbs_fn))
+        stopwords = load_stopwords()
+        i2v = sorted(list(set(load_verbs(self.verbs_fn))))
         v2i = {v: i for i, v in enumerate(i2v)}
-        v2c = load_verb_counts(self.verb_dict_fn, i2v, check_nouns)
+        v2c = load_verb_counts(self.verb_dict_fn, i2v, check_nouns, stopwords)
         verb_preproc = {'i2v': i2v, 'v2i': v2i, 'v2c': v2c}
         subj_i2w, subj_w2i, subj_i2c, subj_i2ns = get_argument_preproc(v2c, 0)
         obj_i2w, obj_w2i, obj_i2c, obj_i2ns = get_argument_preproc(v2c, 1)
@@ -75,10 +80,3 @@ class Preprocessor(object):
         preproc = {'verb': verb_preproc, 'subj': subj_preproc, 'obj': obj_preproc}
         self.preproc = preproc
         dump_obj_fn(preproc, self.preproc_fn)
-        return self.preproc
-# nouns = load_nouns(space_fn)
-# lower_nouns = [n.lower() for n in nouns]
-# check_nouns = set(nouns + lower_nouns)
-# verbs = load_verbs(verbs_fn)
-# verb_counts_new = load_verb_counts(verb_dict_fn, verbs, set(nouns))
-my_preproc = Preprocessor(preproc_fn, space_fn, verb_dict_fn, verbs_fn)

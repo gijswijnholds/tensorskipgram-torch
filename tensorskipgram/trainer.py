@@ -52,37 +52,37 @@ def train_epoch(network: torch.nn.Module,
     return loss
 
 
-subj_matskipgram_modelCPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
-                                        functor_vocab_size=317,
-                                        context_vocab_size=context_vocab_size,
-                                        embed_size=100, nounMatrix=torch.tensor(nounMatrix))
+# subj_matskipgram_modelCPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
+#                                            functor_vocab_size=317,
+#                                            context_vocab_size=context_vocab_size,
+#                                            embed_size=100, nounMatrix=torch.tensor(nounMatrix))
+#
+# subj_matskipgram_modelCPU.to('cpu')
+# optCPU = torch.optim.Adam(subj_matskipgram_modelCPU.parameters())
+# loss_fnCPU = torch.nn.BCEWithLogitsLoss()
+#
+# subj_matskipgram_modelGPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
+#                                            functor_vocab_size=317,
+#                                            context_vocab_size=context_vocab_size,
+#                                            embed_size=100, nounMatrix=torch.tensor(nounMatrix))
+# subj_matskipgram_modelGPU.to('cuda')
+# optGPU = torch.optim.Adam(subj_matskipgram_modelGPU.parameters(), lr=0.005)
+# loss_fnGPU = torch.nn.BCEWithLogitsLoss()
+#
+# NUM_EPOCHS = 5
 
-subj_matskipgram_modelCPU.to('cpu')
-optCPU = torch.optim.Adam(subj_matskipgram_modelCPU.parameters())
-loss_fnCPU = torch.nn.BCEWithLogitsLoss()
-
-subj_matskipgram_modelGPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
-                                        functor_vocab_size=317,
-                                        context_vocab_size=context_vocab_size,
-                                        embed_size=100, nounMatrix=torch.tensor(nounMatrix))
-subj_matskipgram_modelGPU.to('cuda')
-optGPU = torch.optim.Adam(subj_matskipgram_modelGPU.parameters(),lr=0.005)
-loss_fnGPU = torch.nn.BCEWithLogitsLoss()
-
-NUM_EPOCHS = 5
-
-def timeCPUrun(model, loader, loss_fn, opt):
-    model.to('cpu')
-    print(formatTime())
-    epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cpu')
-    return epoch_loss
-
-
-def timeGPUrun(model, loader, loss_fn, opt):
-    model.to('cuda')
-    print(formatTime())
-    epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cuda')
-    return epoch_loss
+# def timeCPUrun(model, loader, loss_fn, opt):
+#     model.to('cpu')
+#     print(formatTime())
+#     epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cpu')
+#     return epoch_loss
+#
+#
+# def timeGPUrun(model, loader, loss_fn, opt):
+#     model.to('cuda')
+#     print(formatTime())
+#     epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cuda')
+#     return epoch_loss
 
 # timeCPUrun(subj_matskipgram_modelCPU, subj_dataloader6, loss_fnCPU, optCPU)
 # timeGPUrun(subj_matskipgram_modelGPU, subj_dataloader6, loss_fnGPU, optGPU)

@@ -34,18 +34,21 @@ def train_epoch(network: torch.nn.Module,
                 dataloader: DataLoader,
                 loss_fn: Callable[[FloatTensor, FloatTensor], FloatTensor],
                 optimizer: torch.optim.Optimizer,
-                device: str) -> float:
+                device: str,
+                epoch_idx: int) -> float:
+    datalen = len(dataloader)
     loss = 0.
     for i, (x_args, x_funcs, x_contexts, y_batch) in enumerate(dataloader):
-        x_args = x_args.to(device).view(-1)  # convert back to your chosen device
-        x_funcs = x_funcs.to(device).view(-1)
-        x_contexts = x_contexts.to(device).view(-1)
-        y_batch = y_batch.to(device, dtype=torch.float32).view(-1)
+        x_args = x_args.to(device)  # convert back to your chosen device
+        x_funcs = x_funcs.to(device)
+        x_contexts = x_contexts.to(device)
+        y_batch = y_batch.to(device, dtype=torch.float32)
         loss += train_batch(network=network, X_args=x_args, X_funcs=x_funcs,
                             X_contexts=x_contexts, Y_batch=y_batch,
                             loss_fn=loss_fn, optimizer=optimizer)
         if i % 100 == 0:
-            print('Batch {}'.format(i))
+            perc = round(100*i/float(datalen), 2)
+            print(f'Batch {i}/{datalen} ({perc}%), Epoch: {epoch_idx}')
             print(formatTime())
             print('Loss {}'.format(loss / (i+1)))
     loss /= (i+1) # divide loss by number of batches for consistency

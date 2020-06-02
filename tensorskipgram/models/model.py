@@ -30,26 +30,26 @@ class MatrixSkipgram(torch.nn.Module):
         assert nounMatrix.shape[1] == embed_size
         self.embed_size = embed_size
         self.argument_embedding = Embedding.from_pretrained(nounMatrix)
-        self.functor_embedding = Embedding(functor_vocab_size, embed_size*embed_size)
+        self.functor_embedding = Embedding(functor_vocab_size, embed_size * embed_size)
         self.context_embedding = Embedding(context_vocab_size, embed_size)
 
     def forward(self, X_argument: Tensor,
                 X_functor: Tensor,
                 X_context: Tensor) -> FloatTensor:
         """
-        :param X_argument: [batch_size]
-        :param X_functor: [batch_size]
-        :param X_context: [batch_size]
-        :return:
+        :param X_argument: [batch_size, num_samples, embed_size]
+        :param X_functor: [batch_size, num_samples, embed_size*embed_size]
+        :param X_context: [batch_size, num_samples, embed_size]
+        :return: batch_dot: [batch_size, num_samples]
         """
-        arg_vecs = self.argument_embedding(X_argument)
-        func_vecs = self.functor_embedding(X_functor)
-        context_vecs = self.context_embedding(X_context)
-        func_mats = func_vecs.view(-1, self.embed_size, self.embed_size)
+        batch_size, num_samples = X_argument.shape
+        arg_vecs = self.argument_embedding(X_argument).view(-1, self.embed_size)
+        func_mats = self.functor_embedding(X_functor).view(-1, self.embed_size,
+                                                           self.embed_size)
+        context_vecs = self.context_embedding(X_context).view(-1, self.embed_size)
 
-        funcarg_vecs = torch.matmul(func_mats, arg_vecs.unsqueeze(2)).squeeze()
-
-        batch_dot = torch.sum(funcarg_vecs * context_vecs, dim=1)
+        funcarg_vecs = torch.bmm(func_mats, arg_vecs.unsqueeze(-1)).squeeze()
+        batch_dot = torch.sum(funcarg_vecs * context_vecs, dim=1).view(batch_size, num_samples)
         return batch_dot
 
 # nounMatrix = torch.rand(50,100)

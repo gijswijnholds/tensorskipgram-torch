@@ -35,8 +35,8 @@ space_fn = os.path.join(folder, 'spaces/tensor_skipgram_vector_spaces/skipgram_1
 verb_dict_fn = os.path.join(folder, 'verb_data/verb_counts_all_corpus_verbs_dict.p')
 verbs_fn = os.path.join(folder, 'verb_data/sick_verbs_full.txt')
 preproc_fn = os.path.join(folder, 'verb_data/preproc_sick_verbcounts.p')
-# model_path = os.path.join(folder, 'verb_data/matrixskipgram_subj')
-model_path = os.path.join(folder, 'verb_data/matrixskipgram_obj')
+model_path = os.path.join(folder, 'verb_data/matrixskipgram_subj')
+# model_path = os.path.join(folder, 'verb_data/matrixskipgram_obj')
 
 
 def main(bs=1, lr=0.005, ne=5):
@@ -46,13 +46,13 @@ def main(bs=1, lr=0.005, ne=5):
     verb_i2v = my_preproc.preproc['verb']['i2v']
     lower2upper = my_preproc.preproc['l2u']
 
-    noun_vocab_size = len(subj_i2w)
-    context_vocab_size = len(obj_i2w)
-    # noun_vocab_size = len(obj_i2w)
-    # context_vocab_size = len(subj_i2w)
+    # noun_vocab_size = len(subj_i2w)
+    # context_vocab_size = len(obj_i2w)
+    noun_vocab_size = len(obj_i2w)
+    context_vocab_size = len(subj_i2w)
     functor_vocab_size = len(verb_i2v)
-    # nounMatrix = createNounMatrix(obj_i2w, lower2upper)
-    nounMatrix = createNounMatrix(subj_i2w, lower2upper)
+    nounMatrix = createNounMatrix(obj_i2w, lower2upper)
+    # nounMatrix = createNounMatrix(subj_i2w, lower2upper)
     nounMatrix = torch.tensor(nounMatrix, dtype=torch.float32)
 
 
@@ -60,33 +60,36 @@ def main(bs=1, lr=0.005, ne=5):
     # subj_dataset = MatrixSkipgramDataset(subj_data_fn, arg='subject', negk=5)
     # subj_dataloader6 = DataLoader(subj_dataset, shuffle=True, batch_size=1)
     print("Preparing data loader...")
-    # subj_dataset = MatrixSkipgramDataset(subj_data_fn, arg='subject', negk=5)
-    # subj_dataloader1 = DataLoader(subj_dataset, shuffle=True, batch_size=1)
+    subj_dataset = MatrixSkipgramDataset(subj_data_fn, arg='subject', negk=5)
+    subj_dataloader = DataLoader(subj_dataset, shuffle=True, batch_size=bs)
     # print("Preparing data loader...")
-    obj_dataset = MatrixSkipgramDataset(obj_data_fn, arg='object', negk=5)
-    obj_dataloader = DataLoader(obj_dataset, shuffle=True, batch_size=bs)
+    # obj_dataset = MatrixSkipgramDataset(obj_data_fn, arg='object', negk=5)
+    # obj_dataloader = DataLoader(obj_dataset, shuffle=True, batch_size=bs)
 
     print("Training model...")
 
-    obj_matskipgram_modelGPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
+    subj_matskipgram_modelGPU = MatrixSkipgram(noun_vocab_size=noun_vocab_size,
                                               functor_vocab_size=functor_vocab_size,
                                               context_vocab_size=context_vocab_size,
                                               embed_size=100, nounMatrix=nounMatrix)
 
-    obj_matskipgram_modelGPU.to('cuda')
-    optGPU = torch.optim.Adam(obj_matskipgram_modelGPU.parameters(), lr=lr)
+    # obj_matskipgram_modelGPU.to('cuda')
+    subj_matskipgram_modelGPU.to(1)
+    optGPU = torch.optim.Adam(subj_matskipgram_modelGPU.parameters(), lr=lr)
     loss_fnGPU = torch.nn.BCEWithLogitsLoss()
 
     NUM_EPOCHS = ne
     epoch_losses = []
     for i in range(NUM_EPOCHS):
-        epoch_loss = train_epoch(obj_matskipgram_modelGPU, obj_dataloader,
-                                 loss_fnGPU, optGPU, device='cuda', epoch_idx=i+1)
+        epoch_loss = train_epoch(subj_matskipgram_modelGPU, subj_dataloader,
+                                 loss_fnGPU, optGPU, device=1, epoch_idx=i+1)
+                                 # loss_fnGPU, optGPU, device='cuda', epoch_idx=i+1)
         # epoch_loss = train_epoch(subj_matskipgram_modelGPU, obj_dataloader6,
                                  # loss_fnGPU, optGPU, device='cuda', epoch_idx=i+1)
         epoch_losses.append(epoch_loss)
         print("Saving model...")
-        torch.save(obj_matskipgram_modelGPU, model_path+f'_bs={bs}_lr={lr}_epoch{i}.p')
+        e = i+1
+        torch.save(subj_matskipgram_modelGPU, model_path+f'_bs={bs}_lr={lr}_epoch{e}.p')
         print("Done saving model, ready for another epoch!")
 
     return epoch_losses

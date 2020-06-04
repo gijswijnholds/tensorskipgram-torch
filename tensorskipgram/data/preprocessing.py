@@ -53,8 +53,8 @@ def get_argument_preproc(verb_counts, i):
 def create_lower_to_upper(nouns):
     noun_dict = {n: n for n in nouns}
     noun_dict_lower = {n.lower(): n for n in nouns}
-    noun_dict.update(noun_dict_lower)
-    return noun_dict
+    noun_dict_lower.update(noun_dict)
+    return noun_dict_lower
 
 
 class Preprocessor(object):

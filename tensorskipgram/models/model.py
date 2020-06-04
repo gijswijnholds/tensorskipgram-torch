@@ -51,6 +51,3 @@ class MatrixSkipgram(torch.nn.Module):
         funcarg_vecs = torch.bmm(func_mats, arg_vecs.unsqueeze(-1)).squeeze()
         batch_dot = torch.sum(funcarg_vecs * context_vecs, dim=1).view(batch_size, num_samples)
         return batch_dot
-
-# nounMatrix = torch.rand(50,100)
-# myMatSG = MatrixSkipgram(50, 10, 20, 100, nounMatrix)

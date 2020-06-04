@@ -29,8 +29,6 @@ def load_verb_counts(verb_dict_fn, verbs, nouns, stopwords):
                          if s in nouns and o in nouns
                          and s not in stopwords and o not in stopwords}
                      for v in tqdm(verbs) if v in verb_dict}
-    # print("Consolidating upper/lowercase counts...Filtering verb counts...")
-    # TODO
     return verb_dict_out
 
 

@@ -46,7 +46,7 @@ def get_split_parse(parse):
 
 class SICK(object):
     def __init__(self, fn):
-        self.fn = fn  # '/homes/gjw30/ExpCode/compdisteval/experiment_data/SICK/SICK.txt'
+        self.fn = fn
         self.data = self.load_data()
         self.sentences = self.split_data()
         self.parse_data = self.parse_data()

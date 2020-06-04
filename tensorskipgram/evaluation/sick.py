@@ -15,7 +15,7 @@ def parse_sents(sents, model):
 
 def get_verbs_args(parse):
     return [(t, [c for c in t.children if c.dep_ == 'nsubj'],
-            [c for c in t.children if c.dep_ == 'dobj'])
+             [c for c in t.children if c.dep_ == 'dobj'])
             for t in parse if t.pos_ == 'VERB']
 
 
@@ -24,7 +24,7 @@ def verb_filter(vargs):
 
 
 def get_subjs_objs_list(vargs):
-    return [s for (v, ss, os) in vargs for s in ss+os]
+    return [s for (v, ss, os) in vargs for s in ss + os]
 
 
 def get_verb_list(vargs):
@@ -32,7 +32,7 @@ def get_verb_list(vargs):
 
 
 def get_verb_args_list(vargs):
-    return [s for (v, ss, os) in vargs for s in [v]+ss+os]
+    return [s for (v, ss, os) in vargs for s in [v] + ss + os]
 
 
 def get_split_parse(parse):
@@ -73,7 +73,7 @@ class SICK(object):
 
     def create_vocabs(self):
         vocab_noun = set([w for (split, vargs) in self.parse_data.values()
-                          for w in split+get_subjs_objs_list(vargs)])
+                          for w in split + get_subjs_objs_list(vargs)])
         vocab_verbs = set([w for (split, vargs) in self.parse_data.values()
                            for w in get_verb_list(vargs)])
         return vocab_noun, vocab_verbs

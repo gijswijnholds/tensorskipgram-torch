@@ -1,5 +1,7 @@
 """Evaluation code; dataset."""
 import os
+import numpy as np
+from tqdm import tqdm
 from torch.utils.data import Dataset
 from tensorskipgram.evaluation.sick import SICK
 from nltk.stem import WordNetLemmatizer
@@ -95,8 +97,25 @@ class SICKPreprocessor(object):
                                   [self.word2index[o] for o in objs if o in self.word2index]))
         return word_idxs, verb_idxs
 
-    def create_matrices(self):
-        
+    def create_noun_matrix(self, space_fn, lower2upper):
+        with open(space_fn, 'r') as file:
+            lines = [ln.strip().split() for ln in file.readlines()]
+        print("Loading vectors...")
+        space = {ln[0]: np.array([float(b) for b in ln[1:]])
+                 for ln in tqdm(lines)}
+        indices = sorted(list(set(self.word2index.values())))
+        noun_matrix = np.zeros((len(indices), 100))
+        print("Filling noun matrix...")
+        for w in self.word2index:
+            noun_matrix[self.word2index[w]] = space[lower2upper[self.word2word[w]]]
+        assert np.count_nonzero(noun_matrix) == np.prod(noun_matrix.shape)
+        print("Done filling noun matrix!")
+        return noun_matrix
+
+    def create_verb_cube(self, arg):
+        assert arg in ['subj', 'obj']
+        pass
+
 
 class SICKDataset(Dataset):
     def __init__(self, task_fn: str):
@@ -123,13 +142,6 @@ allnouns = set(lower2upper.keys())
 allverbs = set(my_preproc.preproc['verb']['i2v'])
 
 sick_preproc = SICKPreprocessor(task_fn, allnouns, allverbs)
-
-
-"""We need two things:
-    1. Map the words in the vocabulary, to words that are in the range of the
-    space.
-    2. Map the words in the vocabulary, to the indices AFTER mapping them to
-    the corresponding words in the range of the space.
-
-
-"""
+noun_matrix = sick_preproc.create_noun_matrix(space_fn, lower2upper)
+verb_subj_cube = sick_preproc.create_verb_cube(arg='subj')
+verb_obj_cube = sick_preproc.create_verb_cube(arg='obj')

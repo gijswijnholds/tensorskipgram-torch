@@ -76,9 +76,27 @@ class SICKPreprocessor(object):
         word2index = create_indexer(word2word)
         return word2word, word2index
 
-    def index_parse(split_parse):
-        pass
+    def index_parse(self, split_parse):
+        """Create an indexed version of a split parse for processing."""
+        words, vargs = split_parse
+        word_idxs = [self.word2index[w] for w in words if w in self.word2index]
+        verb_idxs = []
+        for (v, ss, objs) in vargs:
+            if (v not in self.verb2index or
+                any([s not in self.word2index for s in ss]) or
+                any([o not in self.word2index for o in objs])):
+                if v in self.word2index:
+                    word_idxs.append(self.word2index[v])
+                word_idxs += [self.word2index[s] for s in ss if s in self.word2index]
+                word_idxs += [self.word2index[o] for o in objs if o in self.word2index]
+            else:
+                verb_idxs.append((self.verb2index[v],
+                                  [self.word2index[s] for s in ss if s in self.word2index],
+                                  [self.word2index[o] for o in objs if o in self.word2index]))
+        return word_idxs, verb_idxs
 
+    def create_matrices(self):
+        
 
 class SICKDataset(Dataset):
     def __init__(self, task_fn: str):

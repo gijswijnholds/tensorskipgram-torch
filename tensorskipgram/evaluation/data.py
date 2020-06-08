@@ -1,13 +1,19 @@
 """Evaluation code; dataset."""
 import os
+import torch
+from torch import LongTensor
 import numpy as np
 from tqdm import tqdm
+from typing import Tuple, List
 from torch.utils.data import Dataset
 from tensorskipgram.evaluation.sick import SICK
 from nltk.stem import WordNetLemmatizer
-from tensorskipgram.data.preprocessing import Preprocessor
+from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
 
 UNK_TOKEN = 'UNK'
+
+SentenceData = Tuple[LongTensor, LongTensor, LongTensor, LongTensor]
+EntailmentLabel = int
 
 
 def create_indexer(vocab_mapper):
@@ -18,6 +24,17 @@ def create_indexer(vocab_mapper):
     idx_mapper = {w: i for i, w in enumerate(set(vocab_mapper.values()))}
     word2index = {w: idx_mapper[vocab_mapper[w]] for w in vocab_mapper}
     return word2index
+
+
+def open_model(folder, arg):
+    model_path = os.path.join(folder, f'verb_data/matrixskipgram_{arg}')
+    bs, lr, e = 100, 0.001, 4
+    return torch.load(model_path+f'_bs={bs}_lr={lr}_epoch{e}.p',
+                      map_location='cpu')
+
+
+def get_verb_matrices(model, arg):
+    return model.functor_embedding.weight
 
 
 class SICKPreprocessor(object):
@@ -110,38 +127,72 @@ class SICKPreprocessor(object):
             noun_matrix[self.word2index[w]] = space[lower2upper[self.word2word[w]]]
         assert np.count_nonzero(noun_matrix) == np.prod(noun_matrix.shape)
         print("Done filling noun matrix!")
-        return noun_matrix
+        return torch.tensor(noun_matrix)
 
-    def create_verb_cube(self, arg):
+    def create_verb_cube(self, arg, v2i, folder):
         assert arg in ['subj', 'obj']
-        pass
+        model = open_model(folder, arg)
+        verb_space = get_verb_matrices(model, arg)
+        indices = sorted(list(set(self.verb2index.values())))
+        verb_cube = np.zeros((len(indices), 100, 100))
+        for v in self.verb2index:
+            verb_cube[self.verb2index[v]] = verb_space[self.verb2index[v]].reshape(100, 100).detach().numpy()
+        return torch.tensor(verb_cube)
+
+
+def create_data_single(ws, vargs) -> SentenceData:
+    """Sort indexed training data.
+
+    Given a single list of word indices and verb-argument indices, sort the
+    indices into the four types of combinations (word, verb-subj, verb-obj,
+    verb-subj-obj).
+    """
+    words, verb_subj, verb_obj, verb_trans = ws, [], [], []
+    for (v, ss, objs) in vargs:
+        if ss != [] and objs == []:
+            if len(ss) == 2:
+                words.append(ss[1])
+            verb_subj.append((v, ss[0]))
+        elif ss == [] and objs != []:
+            verb_obj.append((v, objs[0]))
+        else:
+            if len(ss) == 2:
+                words.append(ss[1])
+            verb_trans.append((v, ss[0], objs[0]))
+    return torch.tensor(words), torch.tensor(verb_subj), torch.tensor(verb_obj), torch.tensor(verb_trans)
+
+
+def create_data_pair(preproc: SICKPreprocessor, label_map, s1, s2, label):
+    parse1 = preproc.index_parse(preproc.sick.parse_data[s1])
+    data1 = create_data_single(*parse1)
+    parse2 = preproc.index_parse(preproc.sick.parse_data[s2])
+    data2 = create_data_single(*parse2)
+    y = torch.tensor(label_map[label])
+    return data1, data2, y
+
+
+def create_data_pairs(preproc: SICKPreprocessor, label_map):
+    return [create_data_pair(preproc, label_map, s1, s2, el)
+            for (s1, s2, el, rl) in preproc.sick.data]
 
 
 class SICKDataset(Dataset):
-    def __init__(self, task_fn: str):
-        self.preproc = SICKPreprocessor(task_fn)
+    def __init__(self, data_fn=str):
+        self.label_map = {'CONTRADICTION': 0, 'NEUTRAL': 1, 'ENTAILMENT': 2}
+        self.data_fn = data_fn
+        if os.path.exists(data_fn):
+            print("Data pairs found on disk, loading...")
+            self.data_pairs = load_obj_fn(data_fn)
+        else:
+            print("Data pairs not found, please run create_data with a preproc.")
+            self.data_pairs = None
 
     def __len__(self) -> int:
-        pass
+        return len(self.data_pairs)
 
-    def __getitem__(self, idx: int):
-        pass
+    def __getitem__(self, idx: int) -> Tuple[SentenceData, SentenceData, EntailmentLabel]:
+        return self.data_pairs[idx]
 
-
-task_fn = '/homes/gjw30/ExpCode/compdisteval/experiment_data/SICK/SICK.txt'
-folder = '/import/gijs-shared/gijs'
-data_folder = os.path.join(folder, 'verb_data')
-space_fn = os.path.join(folder, 'spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt')
-verb_dict_fn = os.path.join(folder, 'verb_data/verb_counts_all_corpus_verbs_dict.p')
-verbs_fn = os.path.join(folder, 'verb_data/sick_verbs_full.txt')
-preproc_fn = os.path.join(folder, 'verb_data/preproc_sick_verbcounts.p')
-
-my_preproc = Preprocessor(preproc_fn, space_fn, verb_dict_fn, verbs_fn)
-lower2upper = my_preproc.preproc['l2u']
-allnouns = set(lower2upper.keys())
-allverbs = set(my_preproc.preproc['verb']['i2v'])
-
-sick_preproc = SICKPreprocessor(task_fn, allnouns, allverbs)
-noun_matrix = sick_preproc.create_noun_matrix(space_fn, lower2upper)
-verb_subj_cube = sick_preproc.create_verb_cube(arg='subj')
-verb_obj_cube = sick_preproc.create_verb_cube(arg='obj')
+    def create_data(self, preproc: SICKPreprocessor):
+        self.data_pairs = create_data_pairs(preproc, self.label_map)
+        dump_obj_fn(self.data_pairs, self.data_fn)

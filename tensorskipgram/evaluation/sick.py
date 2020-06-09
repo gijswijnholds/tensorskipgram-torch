@@ -1,6 +1,8 @@
 """The SICK dataset."""
+import os
 import spacy
 from tqdm import tqdm
+from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
 
 
 def load_spacy():
@@ -45,23 +47,30 @@ def get_split_parse(parse):
 
 
 class SICK(object):
-    def __init__(self, fn):
+    def __init__(self, fn: str, data_fn: str):
         self.fn = fn
-        self.data = self.load_data()
-        self.sentences = self.split_data()
-        self.parse_data = self.parse_data()
-        self.noun_vocab, self.verb_vocab = self.create_vocabs()
+        if os.path.exists(data_fn):
+            print("SICK already loaded, loading data from disk...")
+            self.data, self.sentences, self.parse_data, self.noun_vocab, self.verb_vocab = load_obj_fn(data_fn)
+        else:
+            print("SICK data not available yet, generating...")
+            self.data = self.load_data()
+            self.sentences = self.split_data()
+            self.parse_data = self.parse_data()
+            self.noun_vocab, self.verb_vocab = self.create_vocabs()
+            print("Dumping SICK data on disk...")
+            dump_obj_fn((self.data, self.sentences, self.parse_data, self.noun_vocab, self.verb_vocab), data_fn)
 
     def load_data(self):
         with open(self.fn, 'r') as in_file:
             lines = [ln.strip().split('\t') for ln in in_file.readlines()][1:]
-        sentence_data = [tuple(ln[1:5]) for ln in lines]
-        sentence_data = [(s1, s2, el, float(rl))
-                         for (s1, s2, el, rl) in sentence_data]
+        sentence_data = [tuple(ln[1:5]+ln[-1:]) for ln in lines]
+        sentence_data = [(s1, s2, el, float(rl), split)
+                         for (s1, s2, el, rl, split) in sentence_data]
         return sentence_data
 
     def split_data(self):
-        return list(set([s for (s1, s2, _, _) in self.data for s in (s1, s2)]))
+        return list(set([s for (s1, s2, _, _, _) in self.data for s in (s1, s2)]))
 
     def parse_data(self):
         print("Loading Spacy model...")

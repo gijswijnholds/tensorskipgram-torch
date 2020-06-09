@@ -14,6 +14,7 @@ UNK_TOKEN = 'UNK'
 
 SentenceData = Tuple[LongTensor, LongTensor, LongTensor, LongTensor]
 EntailmentLabel = int
+SimilarityLabel = float
 
 
 def create_indexer(vocab_mapper):
@@ -38,8 +39,8 @@ def get_verb_matrices(model, arg):
 
 
 class SICKPreprocessor(object):
-    def __init__(self, fn, nouns, verbs):
-        self.sick = SICK(fn)
+    def __init__(self, fn, data_fn, nouns, verbs):
+        self.sick = SICK(fn, data_fn)
         self.lemmatiser = WordNetLemmatizer()
         self.nouns = nouns
         self.verbs = verbs
@@ -127,7 +128,7 @@ class SICKPreprocessor(object):
             noun_matrix[self.word2index[w]] = space[lower2upper[self.word2word[w]]]
         assert np.count_nonzero(noun_matrix) == np.prod(noun_matrix.shape)
         print("Done filling noun matrix!")
-        return torch.tensor(noun_matrix)
+        return torch.tensor(noun_matrix, dtype=torch.float32)
 
     def create_verb_cube(self, arg, v2i, folder):
         assert arg in ['subj', 'obj']
@@ -137,7 +138,7 @@ class SICKPreprocessor(object):
         verb_cube = np.zeros((len(indices), 100, 100))
         for v in self.verb2index:
             verb_cube[self.verb2index[v]] = verb_space[self.verb2index[v]].reshape(100, 100).detach().numpy()
-        return torch.tensor(verb_cube)
+        return torch.tensor(verb_cube, dtype=torch.float32)
 
 
 def create_data_single(ws, vargs) -> SentenceData:
@@ -162,27 +163,35 @@ def create_data_single(ws, vargs) -> SentenceData:
     return torch.tensor(words), torch.tensor(verb_subj), torch.tensor(verb_obj), torch.tensor(verb_trans)
 
 
-def create_data_pair(preproc: SICKPreprocessor, label_map, s1, s2, label):
+def create_data_pair(preproc: SICKPreprocessor, s1, s2, label):
     parse1 = preproc.index_parse(preproc.sick.parse_data[s1])
     data1 = create_data_single(*parse1)
     parse2 = preproc.index_parse(preproc.sick.parse_data[s2])
     data2 = create_data_single(*parse2)
-    y = torch.tensor(label_map[label])
+    y = torch.tensor([label])
     return data1, data2, y
 
 
-def create_data_pairs(preproc: SICKPreprocessor, label_map):
-    return [create_data_pair(preproc, label_map, s1, s2, el)
-            for (s1, s2, el, rl) in preproc.sick.data]
+def create_data_pairs(preproc: SICKPreprocessor):
+    train_data = [create_data_pair(preproc, s1, s2, rl)
+                  for (s1, s2, el, rl, set) in preproc.sick.data
+                  if set == 'TRAIN']
+    dev_data = [create_data_pair(preproc, s1, s2, rl)
+                for (s1, s2, el, rl, set) in preproc.sick.data
+                if set == 'TRIAL']
+    test_data = [create_data_pair(preproc, s1, s2, rl)
+                 for (s1, s2, el, rl, set) in preproc.sick.data
+                 if set == 'TEST']
+    return {'train': train_data, 'dev': dev_data, 'test': test_data}
 
 
 class SICKDataset(Dataset):
-    def __init__(self, data_fn=str):
-        self.label_map = {'CONTRADICTION': 0, 'NEUTRAL': 1, 'ENTAILMENT': 2}
+    def __init__(self, data_fn: str, setting: str):
         self.data_fn = data_fn
+        self.setting = setting
         if os.path.exists(data_fn):
             print("Data pairs found on disk, loading...")
-            self.data_pairs = load_obj_fn(data_fn)
+            self.data_pairs = load_obj_fn(data_fn)[self.setting]
         else:
             print("Data pairs not found, please run create_data with a preproc.")
             self.data_pairs = None
@@ -190,9 +199,10 @@ class SICKDataset(Dataset):
     def __len__(self) -> int:
         return len(self.data_pairs)
 
-    def __getitem__(self, idx: int) -> Tuple[SentenceData, SentenceData, EntailmentLabel]:
+    def __getitem__(self, idx: int) -> Tuple[SentenceData, SentenceData, SimilarityLabel]:
         return self.data_pairs[idx]
 
     def create_data(self, preproc: SICKPreprocessor):
-        self.data_pairs = create_data_pairs(preproc, self.label_map)
-        dump_obj_fn(self.data_pairs, self.data_fn)
+        all_data = create_data_pairs(preproc)
+        dump_obj_fn(all_data, self.data_fn)
+        self.data_pairs = all_data[self.setting]

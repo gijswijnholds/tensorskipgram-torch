@@ -31,15 +31,49 @@ verb_subj_cube = verb_subj_cube.reshape(verb_subj_cube.shape[0], 10000)
 verb_obj_cube = sick_preproc.create_verb_cube('obj', my_preproc.preproc['verb']['v2i'], folder)
 verb_obj_cube = verb_obj_cube.reshape(verb_obj_cube.shape[0], 10000)
 
-embedder_model = SentenceEmbedderSimilarity(noun_matrix, verb_subj_cube, verb_obj_cube, 100)
-embedder_model.subj_verb_embedding.weight.requires_grad = True
-embedder_model.obj_verb_embedding.weight.requires_grad = True
+
+embedder_model_flex_verbs = SentenceEmbedderSimilarity(noun_matrix, verb_subj_cube, verb_obj_cube, 50)
+embedder_model_flex_verbs.subj_verb_embedding.weight.requires_grad = True
+embedder_model_flex_verbs.obj_verb_embedding.weight.requires_grad = True
+
+embedder_model_flex_nouns = SentenceEmbedderSimilarity(noun_matrix, verb_subj_cube, verb_obj_cube, 50)
+embedder_model_flex_nouns.noun_embedding.weight.requires_grad = True
+
+embedder_model_fix_all = SentenceEmbedderSimilarity(noun_matrix, verb_subj_cube, verb_obj_cube, 50)
+
+embedder_model_flex_all = SentenceEmbedderSimilarity(noun_matrix, verb_subj_cube, verb_obj_cube, 50)
+embedder_model_flex_all.noun_embedding.weight.requires_grad = True
+embedder_model_flex_all.subj_verb_embedding.weight.requires_grad = True
+embedder_model_flex_all.obj_verb_embedding.weight.requires_grad = True
+
 loss_fn = torch.nn.KLDivLoss()
-opt = torch.optim.Adam(embedder_model.parameters(), lr=0.005)
+opt_flex_verbs = torch.optim.Adam(embedder_model_flex_verbs.parameters(), lr=0.005)
+opt_flex_nouns = torch.optim.Adam(embedder_model_flex_nouns.parameters(), lr=0.005)
+opt_flex_all = torch.optim.Adam(embedder_model_flex_all.parameters(), lr=0.005)
+opt_fix_all = torch.optim.Adam(embedder_model_fix_all.parameters(), lr=0.005)
+
 sick_dataloader = DataLoader(sick_dataset_train, shuffle=True, batch_size=1)
 
-num_epochs = 10
-epoch_losses = []
+model_configs = [('fix_all', embedder_model_fix_all, opt_fix_all),
+                 ('flex_nouns', embedder_model_flex_nouns, opt_flex_nouns),
+                 ('flex_verbs', embedder_model_flex_verbs, opt_flex_verbs),
+                 ('flex_all', embedder_model_flex_all, opt_flex_all)]
+num_epochs = 5
+
+model_results = {'fix_all': (), 'flex_nouns': (), 'flex_verbs': (), 'flex_all': ()}
+
+for (name, model, opt) in model_configs:
+    epoch_losses = []
+    evals = [evaluate(model, sick_dataset_dev)]
+    tests = [evaluate(model, sick_dataset_test)]
+    for i in range(num_epochs):
+        epoch_losses.append(train_epoch(model, sick_dataloader, loss_fn, opt, 'cpu', i+1))
+        eval = evaluate(model, sick_dataset_dev)
+        evals.append(eval)
+        test = evaluate(model, sick_dataset_test)
+        tests.append(test)
+        print(f"Eval: {eval},    Test: {test}")
+    model_results[name] = (epoch_losses, evals, tests)
 
 evals = [evaluate(embedder_model, sick_dataset_dev)]
 tests = [evaluate(embedder_model, sick_dataset_test)]

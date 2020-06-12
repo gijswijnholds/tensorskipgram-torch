@@ -253,36 +253,3 @@ class SICKDataset(Dataset):
         all_data = create_data_pairs(preproc)
         dump_obj_fn(all_data, self.data_fn)
         self.data_pairs = all_data[self.setting]
-
-
-def get_sent_sim_nm100(s1, s2):
-    vecs1 = np.mean([noun_matrix[sick_preproc.word2index[w]].numpy() for w in s1.split() if w in sick_preproc.word2index], axis=0)
-    vecs2 = np.mean([noun_matrix[sick_preproc.word2index[w]].numpy() for w in s2.split() if w in sick_preproc.word2index], axis=0)
-    return cosim([vecs1, vecs2])[0][1]
-# #
-# #
-# def get_sent_sim_100(s1, s2):
-#     vecs1 = np.mean([space[w] for w in s1.split() if w in space], axis=0)
-#     vecs2 = np.mean([space[w] for w in s2.split() if w in space], axis=0)
-#     return cosim([vecs1, vecs2])[0][1]
-# def get_sent_sim_100_sum(s1, s2):
-#     vecs1 = np.sum([space[w] for w in s1.split() if w in space], axis=0)
-#     vecs2 = np.sum([space[w] for w in s2.split() if w in space], axis=0)
-#     return cosim([vecs1, vecs2])[0][1]
-# #
-# #
-# def get_corr_100(data):
-#     preds = [get_sent_sim_100(s1, s2) for (s1, s2, l) in data]
-#     trues = [l for (s1, s2, l) in data]
-#     return pearson(preds, trues)
-#
-# def get_corr_100_sum(data):
-#     preds = [get_sent_sim_100_sum(s1, s2) for (s1, s2, l) in data]
-#     trues = [l for (s1, s2, l) in data]
-#     return pearson(preds, trues)
-#
-#
-def get_corr_100_nm(data):
-    preds = [get_sent_sim_nm100(s1, s2) for (s1, s2, l) in data]
-    trues = [l for (s1, s2, l) in data]
-    return pearson(preds, trues)

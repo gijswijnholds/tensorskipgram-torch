@@ -1,5 +1,5 @@
 import math
-from typing import Callable
+from typing import Callable, Tuple, List
 from tqdm import tqdm
 import time
 import numpy as np
@@ -69,6 +69,27 @@ def train_epoch(network: torch.nn.Module,
     return loss
 
 
+def train_epochs(network: torch.nn.Module,
+                 dataloader: DataLoader,
+                 dataset_dev: Dataset,
+                 dataset_test: Dataset,
+                 loss_fn: Callable[[FloatTensor, FloatTensor], FloatTensor],
+                 optimizer: torch.optim.Optimizer,
+                 device: str,
+                 num_epochs: int) -> Tuple[List[float], List[float], List[float]]:
+    epoch_losses = []
+    evals = [evaluate(network, dataset_dev)]
+    tests = [evaluate(network, dataset_test)]
+    for i in range(num_epochs):
+        epoch_losses.append(train_epoch(network, dataloader, loss_fn, optimizer, device, i+1))
+        eval = evaluate(network, dataset_dev)
+        evals.append(eval)
+        test = evaluate(network, dataset_test)
+        tests.append(test)
+        print(f"Eval: {eval},    Test: {test}")
+    return epoch_losses, evals, tests
+
+
 def evaluate(network: torch.nn.Module,
              dataset: Dataset):
     network.eval()
@@ -81,3 +102,88 @@ def evaluate(network: torch.nn.Module,
             preds.append(pred.item())
             trues.append(l.item())
     return pearson(preds, trues)
+
+
+def train_batch_dot(network: torch.nn.Module,
+                    X_sentence1: SentenceData,
+                    X_sentence2: SentenceData,
+                    Y_batch: LongTensor,
+                    loss_fn: Callable[[FloatTensor, FloatTensor], FloatTensor],
+                    optimizer: torch.optim.Optimizer) -> float:
+    network.train()
+    prediction_batch = network(X_sentence1, X_sentence2)  # forward pass
+    # Y_val = Y_batch.item()
+    # pred_val = prediction_batch.item()
+    # Y_val = map_label_to_target(Y_batch.item(), 5)
+    # pred_val = map_label_to_target((((prediction_batch.item()*0.5)+0.5)*4)+1, 5)
+    # batch_loss = loss_fn(pred_val, Y_val)  # loss calculation
+
+    batch_loss = loss_fn(prediction_batch, (Y_batch[0]-3)/2.)  # loss calculation
+    try:
+        batch_loss.backward()  # gradient computation
+    except RuntimeError:
+        print(X_sentence1)
+        print(X_sentence2)
+    optimizer.step()  # back-propagation
+    optimizer.zero_grad()  # gradient reset
+    return batch_loss.item()
+
+
+def train_epoch_dot(network: torch.nn.Module,
+                dataloader: DataLoader,
+                loss_fn: Callable[[FloatTensor, FloatTensor], FloatTensor],
+                optimizer: torch.optim.Optimizer,
+                device: str,
+                epoch_idx: int) -> float:
+    datalen = len(dataloader)
+    loss = 0.
+    for i, (x_sentence1, x_sentence2, y_batch) in enumerate(dataloader):
+        x_sentence1 = list(map(lambda d: d.to(device), x_sentence1))
+        x_sentence2 = list(map(lambda d: d.to(device), x_sentence2))
+        y_batch = y_batch.to(device, dtype=torch.float32)
+        loss += train_batch_dot(network=network, X_sentence1=x_sentence1,
+                                X_sentence2=x_sentence2, Y_batch=y_batch,
+                                loss_fn=loss_fn, optimizer=optimizer)
+        if i % 100 == 0:
+            perc = round(100*i/float(datalen), 2)
+            print(f'Batch {i}/{datalen} ({perc}%), Epoch: {epoch_idx}')
+            print(formatTime())
+            print('Loss {}'.format(loss / (i+1)))
+    loss /= (i+1)  # divide loss by number of batches for consistency
+    return loss
+
+
+def evaluate_dot(network: torch.nn.Module,
+                 dataset: Dataset):
+    network.eval()
+    preds = []
+    trues = []
+    with torch.no_grad():
+        for (s1, s2, l) in tqdm(dataset):
+            model_pred = network(s1, s2)   # will be between 0 and 1
+            # pred = min(torch.tensor([5.]), model_pred)
+            # pred = torch.dot(torch.arange(1, 6).float(), torch.exp(model_pred))
+            preds.append(model_pred.item())
+            trues.append(l.item())
+    return pearson(preds, trues)
+
+
+def train_epochs_dot(network: torch.nn.Module,
+                 dataloader: DataLoader,
+                 dataset_dev: Dataset,
+                 dataset_test: Dataset,
+                 loss_fn: Callable[[FloatTensor, FloatTensor], FloatTensor],
+                 optimizer: torch.optim.Optimizer,
+                 device: str,
+                 num_epochs: int) -> Tuple[List[float], List[float], List[float]]:
+    epoch_losses = []
+    evals = [evaluate_dot(network, dataset_dev)]
+    tests = [evaluate_dot(network, dataset_test)]
+    for i in range(num_epochs):
+        epoch_losses.append(train_epoch_dot(network, dataloader, loss_fn, optimizer, device, i+1))
+        eval = evaluate_dot(network, dataset_dev)
+        evals.append(eval)
+        test = evaluate_dot(network, dataset_test)
+        tests.append(test)
+        print(f"Eval: {eval},    Test: {test}")
+    return epoch_losses, evals, tests

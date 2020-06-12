@@ -22,7 +22,7 @@ def create_indexer(vocab_mapper):
 
     Remove the unknown token as we do not want to incorporate it in our network.
     """
-    idx_mapper = {w: i for i, w in enumerate(set(vocab_mapper.values()))}
+    idx_mapper = {w: i for i, w in enumerate(sorted(list(set(vocab_mapper.values()))))}
     word2index = {w: idx_mapper[vocab_mapper[w]] for w in vocab_mapper}
     return word2index
 
@@ -46,6 +46,8 @@ class SICKPreprocessor(object):
         self.verbs = verbs
         self.verb2verb, self.verb2index = self.create_verb_indexer()
         self.word2word, self.word2index = self.create_word_indexer()
+        # self.index2verb = {i: v for v, i in self.verb2index.items()}
+        # self.index2word = {i: v for v, i in self.word2index.items()}
 
     def create_verb_indexer(self):
         """Create an indexer for verbs.
@@ -163,6 +165,15 @@ def create_data_single(ws, vargs) -> SentenceData:
     return torch.tensor(words), torch.tensor(verb_subj), torch.tensor(verb_obj), torch.tensor(verb_trans)
 
 
+def create_data_pair_noun(preproc: SICKPreprocessor, s1, s2, label):
+    data1 = [preproc.word2index[w] for w in s1.split()
+             if w in preproc.word2index]
+    data2 = [preproc.word2index[w] for w in s2.split()
+             if w in preproc.word2index]
+    y = [label]
+    return torch.tensor(data1), torch.tensor(data2), torch.tensor(y)
+
+
 def create_data_pair(preproc: SICKPreprocessor, s1, s2, label):
     parse1 = preproc.index_parse(preproc.sick.parse_data[s1])
     data1 = create_data_single(*parse1)
@@ -170,6 +181,19 @@ def create_data_pair(preproc: SICKPreprocessor, s1, s2, label):
     data2 = create_data_single(*parse2)
     y = torch.tensor([label])
     return data1, data2, y
+
+
+def create_data_pairs_noun(preproc: SICKPreprocessor):
+    train_data = [create_data_pair_noun(preproc, s1, s2, rl)
+                  for (s1, s2, el, rl, set) in preproc.sick.data
+                  if set == 'TRAIN']
+    dev_data = [create_data_pair_noun(preproc, s1, s2, rl)
+                for (s1, s2, el, rl, set) in preproc.sick.data
+                if set == 'TRIAL']
+    test_data = [create_data_pair_noun(preproc, s1, s2, rl)
+                 for (s1, s2, el, rl, set) in preproc.sick.data
+                 if set == 'TEST']
+    return {'train': train_data, 'dev': dev_data, 'test': test_data}
 
 
 def create_data_pairs(preproc: SICKPreprocessor):
@@ -183,6 +207,29 @@ def create_data_pairs(preproc: SICKPreprocessor):
                  for (s1, s2, el, rl, set) in preproc.sick.data
                  if set == 'TEST']
     return {'train': train_data, 'dev': dev_data, 'test': test_data}
+
+
+class SICKDatasetNouns(Dataset):
+    def __init__(self, data_fn: str, setting: str):
+        self.data_fn = data_fn
+        self.setting = setting
+        if os.path.exists(data_fn):
+            print("Data pairs found on disk, loading...")
+            self.data_pairs = load_obj_fn(data_fn)[self.setting]
+        else:
+            print("Data pairs not found, please run create_data with a preproc.")
+            self.data_pairs = None
+
+    def __len__(self) -> int:
+        return len(self.data_pairs)
+
+    def __getitem__(self, idx: int) -> LongTensor:
+        return self.data_pairs[idx]
+
+    def create_data(self, preproc: SICKPreprocessor):
+        all_data = create_data_pairs_noun(preproc)
+        dump_obj_fn(all_data, self.data_fn)
+        self.data_pairs = all_data[self.setting]
 
 
 class SICKDataset(Dataset):
@@ -206,3 +253,36 @@ class SICKDataset(Dataset):
         all_data = create_data_pairs(preproc)
         dump_obj_fn(all_data, self.data_fn)
         self.data_pairs = all_data[self.setting]
+
+
+def get_sent_sim_nm100(s1, s2):
+    vecs1 = np.mean([noun_matrix[sick_preproc.word2index[w]].numpy() for w in s1.split() if w in sick_preproc.word2index], axis=0)
+    vecs2 = np.mean([noun_matrix[sick_preproc.word2index[w]].numpy() for w in s2.split() if w in sick_preproc.word2index], axis=0)
+    return cosim([vecs1, vecs2])[0][1]
+# #
+# #
+# def get_sent_sim_100(s1, s2):
+#     vecs1 = np.mean([space[w] for w in s1.split() if w in space], axis=0)
+#     vecs2 = np.mean([space[w] for w in s2.split() if w in space], axis=0)
+#     return cosim([vecs1, vecs2])[0][1]
+# def get_sent_sim_100_sum(s1, s2):
+#     vecs1 = np.sum([space[w] for w in s1.split() if w in space], axis=0)
+#     vecs2 = np.sum([space[w] for w in s2.split() if w in space], axis=0)
+#     return cosim([vecs1, vecs2])[0][1]
+# #
+# #
+# def get_corr_100(data):
+#     preds = [get_sent_sim_100(s1, s2) for (s1, s2, l) in data]
+#     trues = [l for (s1, s2, l) in data]
+#     return pearson(preds, trues)
+#
+# def get_corr_100_sum(data):
+#     preds = [get_sent_sim_100_sum(s1, s2) for (s1, s2, l) in data]
+#     trues = [l for (s1, s2, l) in data]
+#     return pearson(preds, trues)
+#
+#
+def get_corr_100_nm(data):
+    preds = [get_sent_sim_nm100(s1, s2) for (s1, s2, l) in data]
+    trues = [l for (s1, s2, l) in data]
+    return pearson(preds, trues)

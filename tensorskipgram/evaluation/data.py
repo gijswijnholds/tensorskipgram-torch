@@ -15,6 +15,7 @@ UNK_TOKEN = 'UNK'
 SentenceData = Tuple[LongTensor, LongTensor, LongTensor, LongTensor]
 EntailmentLabel = int
 SimilarityLabel = float
+entailment_map = {'NEUTRAL': 0., 'CONTRADICTION': 1., 'ENTAILMENT': 2.}
 
 
 def create_indexer(vocab_mapper):
@@ -29,7 +30,7 @@ def create_indexer(vocab_mapper):
 
 def open_model(folder, arg):
     model_path = os.path.join(folder, f'verb_data/matrixskipgram_{arg}')
-    bs, lr, e = 100, 0.001, 4
+    bs, lr, e = 100, 0.001, 5
     return torch.load(model_path+f'_bs={bs}_lr={lr}_epoch{e}.p',
                       map_location='cpu')
 
@@ -46,6 +47,7 @@ class SICKPreprocessor(object):
         self.verbs = verbs
         self.verb2verb, self.verb2index = self.create_verb_indexer()
         self.word2word, self.word2index = self.create_word_indexer()
+        self.space = None
         # self.index2verb = {i: v for v, i in self.verb2index.items()}
         # self.index2word = {i: v for v, i in self.word2index.items()}
 
@@ -123,6 +125,7 @@ class SICKPreprocessor(object):
         print("Loading vectors...")
         space = {ln[0]: np.array([float(b) for b in ln[1:]])
                  for ln in tqdm(lines)}
+        self.space = space
         indices = sorted(list(set(self.word2index.values())))
         noun_matrix = np.zeros((len(indices), 100))
         print("Filling noun matrix...")
@@ -130,16 +133,41 @@ class SICKPreprocessor(object):
             noun_matrix[self.word2index[w]] = space[lower2upper[self.word2word[w]]]
         assert np.count_nonzero(noun_matrix) == np.prod(noun_matrix.shape)
         print("Done filling noun matrix!")
+
         return torch.tensor(noun_matrix, dtype=torch.float32)
 
-    def create_verb_cube(self, arg, v2i, folder):
+    def create_verb_cube(self, arg, v2i, folder,
+                         setting='skipgram', verb_counts=None, lower2upper=None):
         assert arg in ['subj', 'obj']
-        model = open_model(folder, arg)
-        verb_space = get_verb_matrices(model, arg)
+        assert self.space is not None
         indices = sorted(list(set(self.verb2index.values())))
         verb_cube = np.zeros((len(indices), 100, 100))
-        for v in self.verb2index:
-            verb_cube[self.verb2index[v]] = verb_space[self.verb2index[v]].reshape(100, 100).detach().numpy()
+        if setting == 'skipgram':
+            model = open_model(folder, arg)
+            verb_space = get_verb_matrices(model, arg)
+            for v in self.verb2index:
+                verb_cube[self.verb2index[v]] = verb_space[v2i[self.verb2verb[v]]].reshape(100, 100).detach().numpy()
+        elif setting == 'relational':
+            for verb in tqdm(self.verb2index):
+                if self.verb2verb[verb] not in verb_counts:
+                    print(verb)
+                    continue
+                verb_matrix = np.zeros((100, 100))
+                v_counts = verb_counts[self.verb2verb[verb]]
+                for (s, o) in v_counts:
+                    if lower2upper[s] in self.space and lower2upper[o] in self.space:
+                        verb_matrix += np.outer(self.space[lower2upper[s]],
+                                                self.space[lower2upper[o]])
+                if arg == 'obj':
+                    verb_matrix = verb_matrix.T
+                verb_cube[self.verb2index[verb]] = verb_matrix
+        elif setting == 'kronecker':
+            for verb in tqdm(self.verb2index):
+                if self.verb2verb[verb] not in self.space:
+                    continue
+                verb_vector = self.space[self.verb2verb[verb]]
+                verb_matrix = np.outer(verb_vector, verb_vector)
+                verb_cube[self.verb2index[verb]] = verb_matrix
         return torch.tensor(verb_cube, dtype=torch.float32)
 
 
@@ -165,54 +193,61 @@ def create_data_single(ws, vargs) -> SentenceData:
     return torch.tensor(words), torch.tensor(verb_subj), torch.tensor(verb_obj), torch.tensor(verb_trans)
 
 
-def create_data_pair_noun(preproc: SICKPreprocessor, s1, s2, label):
+def create_data_pair_noun(preproc: SICKPreprocessor, s1, s2, el, rl, setting):
     data1 = [preproc.word2index[w] for w in s1.split()
              if w in preproc.word2index]
     data2 = [preproc.word2index[w] for w in s2.split()
              if w in preproc.word2index]
-    y = [label]
-    return torch.tensor(data1), torch.tensor(data2), torch.tensor(y)
+    if setting == 'relatedness':
+        y = torch.tensor([rl])
+    elif setting == 'entailment':
+        y = torch.tensor([entailment_map[el]])
+    return torch.tensor(data1), torch.tensor(data2), y
 
 
-def create_data_pair(preproc: SICKPreprocessor, s1, s2, label):
+def create_data_pair(preproc: SICKPreprocessor, s1, s2, el, rl, setting):
     parse1 = preproc.index_parse(preproc.sick.parse_data[s1])
     data1 = create_data_single(*parse1)
     parse2 = preproc.index_parse(preproc.sick.parse_data[s2])
     data2 = create_data_single(*parse2)
-    y = torch.tensor([label])
+    if setting == 'relatedness':
+        y = torch.tensor([rl])
+    elif setting == 'entailment':
+        y = torch.tensor([entailment_map[el]])
     return data1, data2, y
 
 
-def create_data_pairs_noun(preproc: SICKPreprocessor):
-    train_data = [create_data_pair_noun(preproc, s1, s2, rl)
+def create_data_pairs_noun(preproc: SICKPreprocessor, setting='relatedness'):
+    train_data = [create_data_pair_noun(preproc, s1, s2, el, rl, setting=setting)
                   for (s1, s2, el, rl, set) in preproc.sick.data
                   if set == 'TRAIN']
-    dev_data = [create_data_pair_noun(preproc, s1, s2, rl)
+    dev_data = [create_data_pair_noun(preproc, s1, s2, el, rl, setting=setting)
                 for (s1, s2, el, rl, set) in preproc.sick.data
                 if set == 'TRIAL']
-    test_data = [create_data_pair_noun(preproc, s1, s2, rl)
+    test_data = [create_data_pair_noun(preproc, s1, s2, el, rl, setting=setting)
                  for (s1, s2, el, rl, set) in preproc.sick.data
                  if set == 'TEST']
     return {'train': train_data, 'dev': dev_data, 'test': test_data}
 
 
-def create_data_pairs(preproc: SICKPreprocessor):
-    train_data = [create_data_pair(preproc, s1, s2, rl)
+def create_data_pairs(preproc: SICKPreprocessor, setting='relatedness'):
+    train_data = [create_data_pair(preproc, s1, s2, el, rl, setting=setting)
                   for (s1, s2, el, rl, set) in preproc.sick.data
                   if set == 'TRAIN']
-    dev_data = [create_data_pair(preproc, s1, s2, rl)
+    dev_data = [create_data_pair(preproc, s1, s2, el, rl, setting=setting)
                 for (s1, s2, el, rl, set) in preproc.sick.data
                 if set == 'TRIAL']
-    test_data = [create_data_pair(preproc, s1, s2, rl)
+    test_data = [create_data_pair(preproc, s1, s2, el, rl, setting=setting)
                  for (s1, s2, el, rl, set) in preproc.sick.data
                  if set == 'TEST']
     return {'train': train_data, 'dev': dev_data, 'test': test_data}
 
 
 class SICKDatasetNouns(Dataset):
-    def __init__(self, data_fn: str, setting: str):
+    def __init__(self, data_fn: str, setting: str, data_sort='relatedness'):
         self.data_fn = data_fn
         self.setting = setting
+        self.data_sort = data_sort
         if os.path.exists(data_fn):
             print("Data pairs found on disk, loading...")
             self.data_pairs = load_obj_fn(data_fn)[self.setting]
@@ -227,18 +262,23 @@ class SICKDatasetNouns(Dataset):
         return self.data_pairs[idx]
 
     def create_data(self, preproc: SICKPreprocessor):
-        all_data = create_data_pairs_noun(preproc)
+        all_data = create_data_pairs_noun(preproc, setting=self.data_sort)
         dump_obj_fn(all_data, self.data_fn)
         self.data_pairs = all_data[self.setting]
 
 
 class SICKDataset(Dataset):
-    def __init__(self, data_fn: str, setting: str):
+    def __init__(self, data_fn: str, setting: str, filter: bool=False, data_sort='relatedness'):
         self.data_fn = data_fn
         self.setting = setting
+        self.filter = filter
+        self.data_sort = data_sort
         if os.path.exists(data_fn):
             print("Data pairs found on disk, loading...")
             self.data_pairs = load_obj_fn(data_fn)[self.setting]
+            if self.filter:
+                self.data_pairs = [(s1, s2, l) for (s1, s2, l) in self.data_pairs
+                                   if self.has_verbs(s1) and self.has_verbs(s2)]
         else:
             print("Data pairs not found, please run create_data with a preproc.")
             self.data_pairs = None
@@ -249,7 +289,10 @@ class SICKDataset(Dataset):
     def __getitem__(self, idx: int) -> Tuple[SentenceData, SentenceData, SimilarityLabel]:
         return self.data_pairs[idx]
 
+    def has_verbs(self, s):
+        return (s[1].dim() == 2 or s[2].dim() == 2 or s[3].dim() == 2)
+
     def create_data(self, preproc: SICKPreprocessor):
-        all_data = create_data_pairs(preproc)
+        all_data = create_data_pairs(preproc, setting=self.data_sort)
         dump_obj_fn(all_data, self.data_fn)
         self.data_pairs = all_data[self.setting]

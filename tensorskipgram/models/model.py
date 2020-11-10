@@ -24,12 +24,12 @@ class Skipgram(torch.nn.Module):
 class MatrixSkipgram(torch.nn.Module):
     def __init__(self, noun_vocab_size: int, functor_vocab_size: int,
                  context_vocab_size: int, embed_size: int,
-                 nounMatrix: FloatTensor):
+                 noun_matrix: FloatTensor):
         super(MatrixSkipgram, self).__init__()
-        assert nounMatrix.shape[0] == noun_vocab_size
-        assert nounMatrix.shape[1] == embed_size
+        assert noun_matrix.shape[0] == noun_vocab_size
+        assert noun_matrix.shape[1] == embed_size
         self.embed_size = embed_size
-        self.argument_embedding = Embedding.from_pretrained(nounMatrix)
+        self.argument_embedding = Embedding.from_pretrained(noun_matrix)
         self.functor_embedding = Embedding(functor_vocab_size, embed_size * embed_size)
         self.context_embedding = Embedding(context_vocab_size, embed_size)
 

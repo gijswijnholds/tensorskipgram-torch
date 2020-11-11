@@ -2,21 +2,20 @@
 indexing it for use in a tensor-skipgram model."""
 from collections import Counter
 from tensorskipgram.data.util import dump_obj_fn
-from tensorskipgram.data.preprocessing import Preprocessor
+from tensorskipgram.data.training_data_creator import Preprocessor, DataCreator
 from tensorskipgram.data.ukwackypedia \
     import UKWackypedia, get_verb_args, merge_verb_triples
 from tensorskipgram.data.config \
     import ukwackypedia_split_folder, svo_triples_fn, verblist_fn
+from tensorskipgram.data.config \
+    import noun_space_fn, preproc_fn, subj_data_fn, obj_data_fn
 from tensorskipgram.tasks.datasets \
     import create_ml2008, create_ml2010, create_gs2011, create_ks2013
 from tensorskipgram.tasks.datasets \
     import create_ks2014, create_elldis, create_ellsim
 
-Path = str
-Fn = str
 
-
-def extract_svo_triples(corpus_folder: Path, out_fn: Fn) -> None:
+def extract_svo_triples(corpus_folder: str, out_fn: str) -> None:
     """Extract and save all intances of (s,v,o) triples from a corpus."""
     print("Creating corpus reader...")
     my_verb_corpus = UKWackypedia(corpus_folder,
@@ -46,14 +45,18 @@ def prepare_training_data_nouns() -> None:
     pass
 
 
-def prepare_training_data_verbs() -> None:
-    """Extract and save all intances of (s,v,o) triples from a corpus."""
-    pass
+def prepare_training_data_verbs(preprocessor_fn: str, space_fn: str,
+                                triples_fn: str, verbs_fn: str,
+                                subj_fn: str, obj_fn: str) -> None:
+    """Create and prepare training data for a matrix verb skipgram model."""
+    preproc = Preprocessor(preprocessor_fn, space_fn,
+                           triples_fn, verbs_fn)
+    data_creator = DataCreator(preproc, subj_fn, obj_fn)
+    data_creator.setup()
 
 
 if __name__ == '__main__':
-    # Step 1: take a corpus and extract svo triples, store them away
     extract_svo_triples(ukwackypedia_split_folder, svo_triples_fn)
     extract_verbs(verblist_fn)
-    # Step 2: index them properly, using an indexer that we have somehow obtained?
-    # Step 3: store the non-indexed and indexed data
+    prepare_training_data_verbs(preproc_fn, noun_space_fn, svo_triples_fn,
+                                verblist_fn, subj_data_fn, obj_data_fn)

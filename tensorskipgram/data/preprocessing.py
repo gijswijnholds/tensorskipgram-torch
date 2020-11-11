@@ -2,21 +2,22 @@ import os
 import nltk
 from tqdm import tqdm
 from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
+from typing import List, Set
 
 
-def load_nouns(space_fn):
+def load_nouns(space_fn) -> List[str]:
     with open(space_fn, 'r') as file:
         nouns = [ln.split()[0] for ln in file.readlines()]
     return nouns
 
 
-def load_verbs(verbs_fn):
+def load_verbs(verbs_fn) -> List[str]:
     with open(verbs_fn, 'r') as file:
         verbs = [ln.strip() for ln in file.readlines()]
     return verbs
 
 
-def load_stopwords():
+def load_stopwords() -> Set[str]:
     return set(nltk.corpus.stopwords.words('english') + ['cannot'])
 
 

@@ -5,9 +5,9 @@ from tensorskipgram.data.util import dump_obj_fn
 from tensorskipgram.data.training_data_creator import Preprocessor, DataCreator
 from tensorskipgram.data.ukwackypedia \
     import UKWackypedia, get_verb_args, merge_verb_triples
-from tensorskipgram.data.config \
+from tensorskipgram.config \
     import ukwackypedia_split_folder, svo_triples_fn, verblist_fn
-from tensorskipgram.data.config \
+from tensorskipgram.config \
     import noun_space_fn, preproc_fn, subj_data_fn, obj_data_fn
 from tensorskipgram.tasks.datasets \
     import create_ml2008, create_ml2010, create_gs2011, create_ks2013

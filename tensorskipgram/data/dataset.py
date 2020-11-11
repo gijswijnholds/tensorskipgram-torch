@@ -1,22 +1,21 @@
 import torch
 from tqdm import tqdm
 import numpy as np
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from torch import LongTensor
 from torch.utils.data import Dataset, DataLoader
 from tensorskipgram.data.util import load_obj_fn
 
 
-def createNounMatrix(index2word):
-    spaceInFN = '/import/gijs-shared/gijs/spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt'
-    spaceFile = open(spaceInFN, 'r')
+def create_noun_matrix(space_fn: str, index2word: List[str], lower2upper: Dict):
+    spaceFile = open(space_fn, 'r')
     space = {}
-    for ln in spaceFile.readlines():
+    print("Loading vectors...")
+    for ln in tqdm(spaceFile.readlines()):
         ln = ln.strip().split()
         key = ln[0]
         vec = np.array([float(b) for b in ln[1:]])
         space[key] = vec
-    lower2upper = load_obj_fn('/import/gijs-shared/gijs/skipprob_data/lower2upper.pkl')
     nounMatrix = np.zeros((len(index2word), 100))
     print("Filling noun matrix...")
     for i in range(len(index2word)):

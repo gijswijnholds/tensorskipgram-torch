@@ -2,16 +2,17 @@ import os
 import nltk
 from tqdm import tqdm
 from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
-from typing import List, Set
+
+from typing import List, Set, Dict
 
 
-def load_nouns(space_fn) -> List[str]:
+def load_nouns(space_fn: str) -> List[str]:
     with open(space_fn, 'r') as file:
         nouns = [ln.split()[0] for ln in file.readlines()]
     return nouns
 
 
-def load_verbs(verbs_fn) -> List[str]:
+def load_verbs(verbs_fn: str) -> List[str]:
     with open(verbs_fn, 'r') as file:
         verbs = [ln.strip() for ln in file.readlines()]
     return verbs
@@ -21,7 +22,8 @@ def load_stopwords() -> Set[str]:
     return set(nltk.corpus.stopwords.words('english') + ['cannot'])
 
 
-def load_verb_counts(verb_dict_fn, verbs, nouns, stopwords):
+def load_verb_counts(verb_dict_fn: str, verbs: List[str], nouns: Set[str],
+                     stopwords: Set[str]):
     print("Opening verb counts...")
     verb_dict = load_obj_fn(verb_dict_fn)
     print("Filtering verb counts...")
@@ -51,7 +53,7 @@ def get_argument_preproc(verb_counts, i):
     return arg_i2w, arg_w2i, arg_i2c, arg_i2ns
 
 
-def create_lower_to_upper(nouns):
+def create_lower_to_upper(nouns: Set[str]) -> Dict[str, str]:
     noun_dict = {n: n for n in nouns}
     noun_dict_lower = {n.lower(): n for n in nouns}
     noun_dict_lower.update(noun_dict)

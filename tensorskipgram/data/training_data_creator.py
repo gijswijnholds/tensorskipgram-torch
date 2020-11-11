@@ -1,8 +1,95 @@
 import os
 import numpy as np
+import nltk
 from tqdm import tqdm
-from tensorskipgram.data.preprocessing import Preprocessor
-from tensorskipgram.data.util import dump_obj_fn
+from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
+from typing import List, Set, Dict
+
+
+def load_nouns(space_fn: str) -> List[str]:
+    with open(space_fn, 'r') as file:
+        nouns = [ln.split()[0] for ln in file.readlines()]
+    return nouns
+
+
+def load_verbs(verbs_fn: str) -> List[str]:
+    with open(verbs_fn, 'r') as file:
+        verbs = [ln.strip() for ln in file.readlines()]
+    return verbs
+
+
+def load_stopwords() -> Set[str]:
+    return set(nltk.corpus.stopwords.words('english') + ['cannot'])
+
+
+def load_verb_counts(verb_dict_fn: str, verbs: List[str], nouns: Set[str],
+                     stopwords: Set[str]):
+    print("Opening verb counts...")
+    verb_dict = load_obj_fn(verb_dict_fn)
+    print("Filtering verb counts...")
+    verb_dict_out = {v: {(s, o): verb_dict[v][(s, o)]
+                         for (s, o) in verb_dict[v]
+                         if s in nouns and o in nouns
+                         and s not in stopwords and o not in stopwords}
+                     for v in tqdm(verbs) if v in verb_dict}
+    return verb_dict_out
+
+
+def get_argument_preproc(verb_counts, i):
+    print("Getting argument preproc...")
+    argFreqs = [(args[i], verb_counts[v][args]) for v in tqdm(verb_counts)
+                for args in verb_counts[v]]
+    arg2c = {}
+    for (s, f) in argFreqs:
+        if s in arg2c:
+            arg2c[s] += f
+        else:
+            arg2c[s] = f
+    arg_i2w = sorted(arg2c.keys())
+    arg_w2i = {w: i for i, w in enumerate(arg_i2w)}
+    arg_i2c = [arg2c[w] for w in arg_i2w]
+    arg_nsSum = float(sum([c**0.75 for c in arg_i2c]))
+    arg_i2ns = [(c**0.75) / arg_nsSum for c in arg_i2c]
+    return arg_i2w, arg_w2i, arg_i2c, arg_i2ns
+
+
+def create_lower_to_upper(nouns: Set[str]) -> Dict[str, str]:
+    noun_dict = {n: n for n in nouns}
+    noun_dict_lower = {n.lower(): n for n in nouns}
+    noun_dict_lower.update(noun_dict)
+    return noun_dict_lower
+
+
+class Preprocessor(object):
+    def __init__(self, preproc_fn: str, space_fn: str, verb_dict_fn: str, verbs_fn: str):
+        self.preproc_fn = preproc_fn
+        self.space_fn = space_fn
+        self.verb_dict_fn = verb_dict_fn
+        self.verbs_fn = verbs_fn
+        if os.path.exists(preproc_fn):
+            print("Loading preprocessing data...")
+            self.preproc = load_obj_fn(preproc_fn)
+        else:
+            print("Preprocessing has not been done, will run setup to create" +
+                  "and save a preprocessor.")
+            self.setup()
+
+    def setup(self):
+        nouns = load_nouns(self.space_fn)
+        check_nouns = set(nouns + [n.lower() for n in nouns])
+        lower_to_upper = create_lower_to_upper(nouns)
+        stopwords = load_stopwords()
+        i2v = sorted(list(set(load_verbs(self.verbs_fn))))
+        v2i = {v: i for i, v in enumerate(i2v)}
+        v2c = load_verb_counts(self.verb_dict_fn, i2v, check_nouns, stopwords)
+        verb_preproc = {'i2v': i2v, 'v2i': v2i, 'v2c': v2c}
+        subj_i2w, subj_w2i, subj_i2c, subj_i2ns = get_argument_preproc(v2c, 0)
+        obj_i2w, obj_w2i, obj_i2c, obj_i2ns = get_argument_preproc(v2c, 1)
+        subj_preproc = {'i2w': subj_i2w, 'w2i': subj_w2i, 'i2c': subj_i2c, 'i2ns': subj_i2ns}
+        obj_preproc = {'i2w': obj_i2w, 'w2i': obj_w2i, 'i2c': obj_i2c, 'i2ns': obj_i2ns}
+        preproc = {'verb': verb_preproc, 'subj': subj_preproc, 'obj': obj_preproc, 'l2u': lower_to_upper}
+        self.preproc = preproc
+        dump_obj_fn(preproc, self.preproc_fn)
 
 
 def create_train_data_verb(verb, counts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k=5):
@@ -51,11 +138,12 @@ def create_train_data(verbs, verbCounts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k
 
 
 class DataCreator(object):
-    def __init__(self, preproc: Preprocessor, data_folder: str):
+    def __init__(self, preproc: Preprocessor, subj_data_fn: str, obj_data_fn: str):
         if preproc.preproc is None:
             print("Preprocessing has not been done, please run preprocessor setup.")
         self.preproc = preproc
-        self.data_folder = data_folder
+        self.subj_data_fn = subj_data_fn
+        self.obj_data_fn = obj_data_fn
 
     def setup(self):
         verb_preproc = self.preproc.preproc['verb']
@@ -69,9 +157,7 @@ class DataCreator(object):
         obj_train_data = create_train_data(verbs, v2c, v2i, subj_w2i, obj_w2i,
                                            obj_i2ns, 'obj', ns_k=5)
         print("Dumping subj_neg data...")
-        dump_obj_fn(subj_train_data,
-                    os.path.join(self.data_folder, 'subj_train_data.p'))
+        dump_obj_fn(subj_train_data, self.subj_data_fn)
         print("Dumping obj_neg data...")
-        dump_obj_fn(obj_train_data,
-                    os.path.join(self.data_folder, 'obj_train_data.p'))
+        dump_obj_fn(obj_train_data, self.obj_data_fn)
         print("All done!")

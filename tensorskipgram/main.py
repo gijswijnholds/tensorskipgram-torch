@@ -5,7 +5,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from tensorskipgram.trainer import train_epoch
 from tensorskipgram.data.preprocessing import Preprocessor
-from tensorskipgram.data.prepare_data import subj_data_fn, obj_data_fn
+from tensorskipgram.data.config import subj_data_fn, obj_data_fn
 from tensorskipgram.data.dataset import MatrixSkipgramDataset
 from tensorskipgram.models.model import MatrixSkipgram
 

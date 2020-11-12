@@ -37,8 +37,12 @@ We do *not* provide the verb cube model or the ablation matrix model, as they un
 
 We display the results that we obtain on multiple evaluation datasets in the table below:
 
-| Dataset  | Spearman rho | Human agreement |
-| ---------|:------------:|:---------------:|
-| ML2008   |     xx       |       xx        |
-| ML2010   |     xx       |       xx        |
-| GS2011   |     xx       |       xx        |
+| Dataset   | Spearman rho | Human agreement |
+| --------- |:------------:|:---------------:|
+| ML2008    |     xx       |       xx        |
+| ML2010    |     xx       |       xx        |
+| GS2011    |     xx       |       xx        |
+| KS2013a   |     xx       |       xx        |
+| KS2013b   |     xx       |       xx        |
+| ELLDIS    |     xx       |       xx        |
+| ELLSIM    |     xx       |       xx        |

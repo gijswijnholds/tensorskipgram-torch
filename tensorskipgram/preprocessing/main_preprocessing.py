@@ -47,16 +47,17 @@ def prepare_training_data_nouns() -> None:
 
 def prepare_training_data_verbs(preprocessor_fn: str, space_fn: str,
                                 triples_fn: str, verbs_fn: str,
-                                subj_fn: str, obj_fn: str) -> None:
+                                subj_fn: str, obj_fn: str,
+                                neg_samples: int) -> None:
     """Create and prepare training data for a matrix verb skipgram model."""
     preproc = Preprocessor(preprocessor_fn, space_fn,
                            triples_fn, verbs_fn)
     data_creator = DataCreator(preproc, subj_fn, obj_fn)
-    data_creator.setup()
+    data_creator.setup(neg_samples=neg_samples)
 
 
-if __name__ == '__main__':
+def main():
     extract_svo_triples(ukwackypedia_split_folder, svo_triples_fn)
     extract_verbs(verblist_fn)
     prepare_training_data_verbs(preproc_fn, noun_space_fn, svo_triples_fn,
-                                verblist_fn, subj_data_fn, obj_data_fn)
+                                verblist_fn, subj_data_fn, obj_data_fn, 10)

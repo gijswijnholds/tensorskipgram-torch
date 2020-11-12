@@ -120,21 +120,21 @@ def create_train_data_verb(verb, counts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k
     return array
 
 
-def create_train_data(verbs, verbCounts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k=5):
+def create_train_data(verbs, verb_counts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k=5):
     """Create training data for the Verb-Object model, in which the object is
     fixed and negative sampling happens for subjects."""
     print("Generating data...")
-    verbArrays = [create_train_data_verb(verb, verbCounts[verb], v2i, subj_w2i,
-                                         obj_w2i, i2ns, arg, ns_k=ns_k)
-                  for verb in tqdm(verbCounts)]
+    verb_arrays = [create_train_data_verb(verb, verb_counts[verb], v2i, subj_w2i,
+                                          obj_w2i, i2ns, arg, ns_k=ns_k)
+                  for verb in tqdm(verb_counts)]
     print("Concatenating arrays...")
-    singleVerbArrays = np.concatenate(verbArrays)
+    single_verb_arrays = np.concatenate(verb_arrays)
     print("Shuffling batches...")
-    np.random.shuffle(singleVerbArrays)
+    np.random.shuffle(single_verb_arrays)
     print("Concatenating batches...")
-    finalVerbArrays = np.concatenate(singleVerbArrays)
+    final_verb_arrays = np.concatenate(single_verb_arrays)
     print("Done creating training data!...")
-    return finalVerbArrays
+    return final_verb_arrays
 
 
 class DataCreator(object):
@@ -145,7 +145,7 @@ class DataCreator(object):
         self.subj_data_fn = subj_data_fn
         self.obj_data_fn = obj_data_fn
 
-    def setup(self):
+    def setup(self, neg_samples: int = 5) -> None:
         verb_preproc = self.preproc.preproc['verb']
         verbs, v2i, v2c = verb_preproc['i2v'], verb_preproc['v2i'], verb_preproc['v2c']
         subj_preproc = self.preproc.preproc['subj']
@@ -153,9 +153,9 @@ class DataCreator(object):
         obj_preproc = self.preproc.preproc['obj']
         obj_w2i, obj_i2ns = obj_preproc['w2i'], obj_preproc['i2ns']
         subj_train_data = create_train_data(verbs, v2c, v2i, subj_w2i, obj_w2i,
-                                            subj_i2ns, 'subj', ns_k=5)
+                                            subj_i2ns, 'subj', ns_k=neg_samples)
         obj_train_data = create_train_data(verbs, v2c, v2i, subj_w2i, obj_w2i,
-                                           obj_i2ns, 'obj', ns_k=5)
+                                           obj_i2ns, 'obj', ns_k=neg_samples)
         print("Dumping subj_neg data...")
         dump_obj_fn(subj_train_data, self.subj_data_fn)
         print("Dumping obj_neg data...")

@@ -32,7 +32,7 @@ class Task(Generic[Sample]):
 
 
 SimilaritySample = Tuple[List[str], List[str], float]
-ClassLabel = Tuple[List[str], List[str], int]
+ClassSample = Tuple[List[str], List[str], int]
 
 SimilarityTask = Task[SimilaritySample]
 DisambiguationTask = Task[ClassSample]

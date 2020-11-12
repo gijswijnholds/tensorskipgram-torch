@@ -8,6 +8,9 @@ from tensorskipgram.data.preprocessing import Preprocessor
 from tensorskipgram.config import subj_data_fn, obj_data_fn, noun_space_fn
 from tensorskipgram.data.dataset import create_noun_matrix, MatrixSkipgramDataset
 from tensorskipgram.models.model import MatrixSkipgram
+from tensorskipgram.data.main_preprocessing import main as preprocessing_main
+from tensorskipgram.data.main_evaluation import main as evaluation_main
+from tensorskipgram.data.main_training import main as training_main
 
 folder = '/import/gijs-shared/gijs'
 data_folder = os.path.join(folder, 'verb_data')
@@ -110,3 +113,9 @@ def main(bs=1, lr=0.005, ne=5):
 # optGPU = torch.optim.Adam(obj_matskipgram_modelGPU.parameters(), lr=0.005)
 # loss_fnGPU = torch.nn.BCEWithLogitsLoss()
 spaceInFN = '/import/gijs-shared/gijs/spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt'
+
+
+def final_main():
+    preprocessing_main()
+    training_main()
+    evaluation_main()

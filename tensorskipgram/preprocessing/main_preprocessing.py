@@ -1,5 +1,4 @@
-"""The main code for extracting dependency data from a parsed corpus, and
-indexing it for use in a tensor-skipgram model."""
+"""Main code for extracting dependency data from a parsed corpus."""
 from collections import Counter
 from tensorskipgram.data.util import dump_obj_fn
 from tensorskipgram.data.training_data_creator import Preprocessor, DataCreator

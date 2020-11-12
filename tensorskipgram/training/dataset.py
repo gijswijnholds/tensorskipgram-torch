@@ -3,7 +3,7 @@ from tqdm import tqdm
 import numpy as np
 from typing import Tuple, List, Dict
 from torch import LongTensor
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from tensorskipgram.data.util import load_obj_fn
 
 
@@ -23,26 +23,6 @@ def create_noun_matrix(space_fn: str, index2word: List[str], lower2upper: Dict):
     assert np.count_nonzero(nounMatrix) == np.prod(nounMatrix.shape)
     print("Done filling noun matrix!")
     return nounMatrix
-
-
-def loadArgAnalysers():
-    subj_preprocFileName = '/import/gijs-shared/gijs/skipprob_data/preproc_sick_subj.pkl'
-    obj_preprocFileName = '/import/gijs-shared/gijs/skipprob_data/preproc_sick_obj.pkl'
-    print("Loading preprocs...")
-    subj_preproc = load_obj_fn(subj_preprocFileName)
-    obj_preproc = load_obj_fn(obj_preprocFileName)
-
-    subj_i2w, subj_w2i, subj_i2c, subj_i2ns = (subj_preproc['index2word'],
-                                               subj_preproc['word2index'],
-                                               subj_preproc['index2count'],
-                                               subj_preproc['index2negsample'])
-
-    obj_i2w, obj_w2i, obj_i2c, obj_i2ns = (obj_preproc['index2word'],
-                                           obj_preproc['word2index'],
-                                           obj_preproc['index2count'],
-                                           obj_preproc['index2negsample'])
-    return (subj_i2w, subj_w2i, subj_i2c, subj_i2ns,
-            obj_i2w, obj_w2i, obj_i2c, obj_i2ns)
 
 
 class SkipgramDataset(Dataset):
@@ -70,9 +50,13 @@ class MatrixSkipgramDataset(Dataset):
         print("Preparing data in PyTorch format...")
         assert arg in ['subject', 'object']
         if arg == 'subject':  # objects are fixed nouns
-            self.X_contexts, self.X_funcs, self.X_args, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), tqdm(data)))
+            self.X_contexts, self.X_funcs, self.X_args, self.Y = \
+             list(map(lambda x: torch.tensor(list(x), dtype=torch.long),
+                      tqdm(data)))
         if arg == 'object':  # subjects are fixed nouns (X_args)
-            self.X_args, self.X_funcs, self.X_contexts, self.Y = list(map(lambda x: torch.tensor(list(x), dtype=torch.long), tqdm(data)))
+            self.X_args, self.X_funcs, self.X_contexts, self.Y = \
+             list(map(lambda x: torch.tensor(list(x), dtype=torch.long),
+                      tqdm(data)))
         self.batchidx = negk+1
         print("Done preparing data!")
 
@@ -83,36 +67,3 @@ class MatrixSkipgramDataset(Dataset):
         lidx = idx*self.batchidx
         ridx = (idx+1)*self.batchidx
         return self.X_args[lidx:ridx], self.X_funcs[lidx:ridx], self.X_contexts[lidx:ridx], self.Y[lidx:ridx]
-
-
-
-sick_data_fn_subj = "/import/gijs-shared/gijs/skipprob_data/training_data_sick_subject/train_data_proper_asym_ns=5.npy"
-sick_data_fn_obj = "/import/gijs-shared/gijs/skipprob_data/training_data_sick_object/train_data_proper_asym_ns=5.npy"
-
-# subjDataset = MatrixSkipgramDataset(sick_data_fn_subj, arg='subject', negk=5)
-# objDataset = MatrixSkipgramDataset(sick_data_fn_obj, arg='object')
-
-# subj_dataloader6 = DataLoader(subjDataset,
-#                               shuffle=True,
-#                               batch_size=1)
-#
-# subj_dataloader48 = DataLoader(subjDataset,
-#                                shuffle=True,
-#                                batch_size=8)
-#
-# subj_dataloader96 = DataLoader(subjDataset,
-#                                shuffle=True,
-#                                batch_size=16)
-#
-# subj_dataloader96 = DataLoader(subjDataset,
-#                                shuffle=True,
-#                                batch_size=64)
-# print("Loading analysers...")
-# (subj_i2w, subj_w2i, subj_i2c, subj_i2ns,
-#  obj_i2w, obj_w2i, obj_i2c, obj_i2ns) = \
-#     loadArgAnalysers()
-
-# noun_vocab_size = len(obj_i2w)
-# context_vocab_size = len(subj_i2w)
-# nounMatrix = createNounMatrix(obj_i2w)
-# nounMatrix = torch.tensor(nounMatrix, dtype=torch.float32)

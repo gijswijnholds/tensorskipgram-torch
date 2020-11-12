@@ -8,10 +8,8 @@ from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
 
 
-def formatTime():
+def format_time():
     return time.strftime('%X %x %Z')
-    # timeNow = time()
-    # return ('%d:%02d:%02d' % (timeNow // 3600, (timeNow % 3600) // 60, timeNow % 60))
 
 
 def train_batch(network: torch.nn.Module,
@@ -49,7 +47,7 @@ def train_epoch(network: torch.nn.Module,
         if i % 100 == 0:
             perc = round(100*i/float(datalen), 2)
             print(f'Batch {i}/{datalen} ({perc}%), Epoch: {epoch_idx}')
-            print(formatTime())
+            print(format_time())
             print('Loss {}'.format(loss / (i+1)))
     loss /= (i+1) # divide loss by number of batches for consistency
     return loss
@@ -76,14 +74,14 @@ def train_epoch(network: torch.nn.Module,
 
 # def timeCPUrun(model, loader, loss_fn, opt):
 #     model.to('cpu')
-#     print(formatTime())
+#     print(format_time())
 #     epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cpu')
 #     return epoch_loss
 #
 #
 # def timeGPUrun(model, loader, loss_fn, opt):
 #     model.to('cuda')
-#     print(formatTime())
+#     print(format_time())
 #     epoch_loss = train_epoch(model, loader, loss_fn, opt, device='cuda')
 #     return epoch_loss
 

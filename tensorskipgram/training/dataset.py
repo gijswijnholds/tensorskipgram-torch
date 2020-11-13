@@ -48,12 +48,12 @@ class MatrixSkipgramDataset(Dataset):
             print("Loading data...")
             data = load_obj_fn(data_filename).T
         print("Preparing data in PyTorch format...")
-        assert arg in ['subject', 'object']
-        if arg == 'subject':  # objects are fixed nouns
+        assert arg in ['subj', 'obj']
+        if arg == 'subj':  # objects are fixed nouns
             self.X_contexts, self.X_funcs, self.X_args, self.Y = \
              list(map(lambda x: torch.tensor(list(x), dtype=torch.long),
                       tqdm(data)))
-        if arg == 'object':  # subjects are fixed nouns (X_args)
+        if arg == 'obj':  # subjects are fixed nouns (X_args)
             self.X_args, self.X_funcs, self.X_contexts, self.Y = \
              list(map(lambda x: torch.tensor(list(x), dtype=torch.long),
                       tqdm(data)))

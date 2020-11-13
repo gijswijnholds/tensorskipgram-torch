@@ -5,6 +5,7 @@ import numpy as np
 Vector = np.ndarray
 Matrix = np.ndarray
 
+
 def read_vectors(space_fn: str) -> Dict:
     spaceFile = open(space_fn, 'r')
     space = {}

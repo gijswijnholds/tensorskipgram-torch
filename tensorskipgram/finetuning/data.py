@@ -4,7 +4,7 @@ import torch
 from torch import LongTensor
 import numpy as np
 from tqdm import tqdm
-from typing import Tuple, List
+from typing import Tuple
 from torch.utils.data import Dataset
 from tensorskipgram.evaluation.sick import SICK
 from nltk.stem import WordNetLemmatizer
@@ -268,7 +268,7 @@ class SICKDatasetNouns(Dataset):
 
 
 class SICKDataset(Dataset):
-    def __init__(self, data_fn: str, setting: str, filter: bool=False, data_sort='relatedness'):
+    def __init__(self, data_fn: str, setting: str, filter: bool = False, data_sort ='relatedness'):
         self.data_fn = data_fn
         self.setting = setting
         self.filter = filter

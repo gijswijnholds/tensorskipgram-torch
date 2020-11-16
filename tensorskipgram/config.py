@@ -18,5 +18,9 @@ sick_obj_data_fn = os.path.join(base_folder, 'skipprob_data/training_data_sick_o
 
 preproc_fn = os.path.join(base_folder, 'verb_data/preprocessor.p')
 
-model_path = os.path.join(base_folder, 'verb_data/matrixskipgram_subj')
-model_path = os.path.join(base_folder, 'verb_data/matrixskipgram_obj')
+model_path_subj = os.path.join(base_folder, 'verb_data/matrixskipgram_subj')
+model_path_obj = os.path.join(base_folder, 'verb_data/matrixskipgram_obj')
+
+
+model_path_subj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_subj_bs=11_lr=0.001_epoch1.p')
+model_path_obj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_obj_bs=11_lr=0.001_epoch1.p')

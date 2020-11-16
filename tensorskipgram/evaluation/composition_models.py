@@ -36,6 +36,26 @@ class CompositionTwoModel(object):
         pass
 
 
+class CompositionTwoModelMix(object):
+    def __init__(self, name: str, vector_space: VectorSpace,
+                 matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
+                 composer: Callable[List[Union[Vector, Matrix]], Vector],
+                 alpha: float):
+        self._name = name
+        self._vector_space = vector_space
+        self._matrix_space1 = matrix_space1
+        self._matrix_space2 = matrix_space2
+        self._composer = composer
+        self._alpha = alpha
+
+    @property
+    def name(self):
+        return self._name
+
+    def __call__(self, sentence):
+        pass
+
+
 class IntransitiveModel(CompositionModel):
     def __call__(self, sentence: str) -> Vector:
         arg, verb = sentence
@@ -91,3 +111,33 @@ class EllipsisTwoModel(CompositionTwoModel):
         obj_vec = self._vector_space.embed(obj)
         subj2_vec = self._vector_space.embed(subj2)
         self._composer([subj_vec, verb_mat1, verb_mat2, obj_vec, subj2_vec])
+
+
+class IntransitiveTwoModelMix(CompositionTwoModelMix):
+    def __call__(self, sentence: str) -> Vector:
+        arg, verb = sentence
+        arg_vec = self._vector_space.embed(arg)
+        verb_mat1 = self._matrix_space1.embed(verb)
+        verb_mat2 = self._matrix_space2.embed(verb)
+        return self._composer([arg_vec, verb_mat1, verb_mat2], alpha=self._alpha)
+
+
+class TransitiveTwoModelMix(CompositionTwoModelMix):
+    def __call__(self, sentence: str) -> Vector:
+        subj, verb, obj = sentence
+        subj_vec = self._vector_space.embed(subj)
+        verb_mat1 = self._matrix_space1.embed(verb)
+        verb_mat2 = self._matrix_space2.embed(verb)
+        obj_vec = self._vector_space.embed(obj)
+        return self._composer([subj_vec, verb_mat1, verb_mat2, obj_vec], alpha=self._alpha)
+
+
+class EllipsisTwoModelMix(CompositionTwoModelMix):
+    def __call__(self, sentence: str) -> Vector:
+        subj, verb, obj, coord, subj2, does, too = sentence
+        subj_vec = self._vector_space.embed(subj)
+        verb_mat1 = self._matrix_space1.embed(verb)
+        verb_mat2 = self._matrix_space2.embed(verb)
+        obj_vec = self._vector_space.embed(obj)
+        subj2_vec = self._vector_space.embed(subj2)
+        self._composer([subj_vec, verb_mat1, verb_mat2, obj_vec, subj2_vec], alpha=self._alpha)

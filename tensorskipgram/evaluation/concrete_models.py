@@ -4,7 +4,8 @@ from tensorskipgram.evaluation.composers \
 from tensorskipgram.evaluation.composers import frobenius_add, frobenius_mult
 from tensorskipgram.evaluation.composers \
     import cat_argument, copy_argument, copy_argument_sum
-from tensorskipgram.evaluation.composers import ell_wrapper
+from tensorskipgram.evaluation.composers import
+    import ell_cat_subject_sum, ell_cat_subject_mult, ell_cat_object_sum, ell_cat_object_mult
 from tensorskipgram.evaluation.spaces import VectorSpace, MatrixSpace
 from tensorskipgram.evaluation.composition_models \
     import IntransitiveModel, TransitiveModel, EllipsisModel
@@ -49,3 +50,12 @@ cat_argument_models = [make_concrete_mix_model("cat-argument-svo", TransitiveTwo
                        cat_subject, cat_object, a) for a in alphas]
 
 """ Ellipsis Models """
+ell_cat_subject_sum_model = make_concrete_model("ell-cat-subject-sum-svos", EllipsisTwoModel, ell_cat_subject_sum)
+ell_cat_subject_mult_model = make_concrete_model("ell-cat-subject-mult-svos", EllipsisTwoModel, ell_cat_subject_mult)
+
+ell_cat_object_sum_model = make_concrete_model("ell-cat-object-sum-svos", EllipsisTwoModel, ell_cat_object_sum)
+ell_cat_object_mult_model = make_concrete_model("ell-cat-object-mult-svos", EllipsisTwoModel, ell_cat_object_mult)
+
+
+ell_models = [ell_cat_subject_sum_model, ell_cat_subject_mult_model,
+              ell_cat_object_sum_model, ell_cat_object_mult_model]

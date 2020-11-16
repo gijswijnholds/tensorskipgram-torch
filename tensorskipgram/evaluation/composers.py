@@ -64,6 +64,30 @@ def ell_wrapper(vects: List[Union[Vector, Matrix]],
                        trans_model([subj2_vec, verb_mat, obj_vec]))
 
 
+def add(v1, v2):
+    return v1+v2
+
+
+def mult(v1, v2):
+    return v1*v2
+
+
+def ell_cat_subject_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, cat_subject, add)
+
+
+def ell_cat_subject_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, cat_subject, mult)
+
+
+def ell_cat_object_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, cat_object, add)
+
+
+def ell_cat_object_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, cat_object, mult)
+
+
 """Two Map Transitive Models."""
 
 

@@ -39,10 +39,12 @@ We display the results that we obtain on multiple evaluation datasets in the tab
 
 | Dataset   | Spearman rho | Human agreement |
 | --------- |:------------:|:---------------:|
-| ML2008    |     xx       |       xx        |
-| ML2010    |     xx       |       xx        |
-| GS2011    |     xx       |       xx        |
-| KS2013a   |     xx       |       xx        |
-| KS2013b   |     xx       |       xx        |
-| ELLDIS    |     xx       |       xx        |
-| ELLSIM    |     xx       |       xx        |
+| ML2008    |     .19      |       .66       |
+| ML2010    |     .55      |       .71       |
+| GS2011    |     .54      |       .74       |
+| KS2013a   |     .37      |       .58       |
+| KS2013b   |     .75      |       .75       |
+| ELLDIS    |     .56      |       .58       |
+| ELLSIM    |     .76      |       .43       |
+
+On SICK-R, we achieve a Pearson correlation score of 0.70.

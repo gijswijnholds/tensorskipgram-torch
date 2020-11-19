@@ -25,6 +25,12 @@ If you use any of this code or the available representations, or you made any ot
 
 ## Code
 
+In order to recreate the experiments, you will need to perform three steps, as outlined in `main.py`:
+
+1. Preprocess a corpus of choice to extract SVO triples. In our case we use UKWackyPedia, but you can implement your corpus as well. This code is in the *preprocessing* folder.
+2. Train matrices. This code you find in the *training* folder.
+3. Evaluate the matrices on a selection of tasks. This is done in the *evaluation* folder.
+
 ## Models
 
 We publish the models of our proposed method, which are a pair of matrix representations per verb, each one of which multiplies with the vectors for one of the verb's arguments to predict the other argument. The models cover a list of 1160 verbs, that were extracted from the evaluation datasets. Of course, you can retrain the model on another set of verbs.

@@ -4,7 +4,7 @@ from tensorskipgram.evaluation.composers \
 from tensorskipgram.evaluation.composers import frobenius_add, frobenius_mult
 from tensorskipgram.evaluation.composers \
     import cat_argument, copy_argument, copy_argument_sum
-from tensorskipgram.evaluation.composers import
+from tensorskipgram.evaluation.composers \
     import ell_cat_subject_sum, ell_cat_subject_mult, ell_cat_object_sum, ell_cat_object_mult
 from tensorskipgram.evaluation.spaces import VectorSpace, MatrixSpace
 from tensorskipgram.evaluation.composition_models \

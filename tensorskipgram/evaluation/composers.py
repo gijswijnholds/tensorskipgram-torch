@@ -57,8 +57,8 @@ def frobenius_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
 
 
 def ell_wrapper(vects: List[Union[Vector, Matrix]],
-                trans_model: Callable[List[Union[Vector, Matrix]], Vector],
-                coordinator: Callable[Tuple[Vector, Vector], Vector]) -> Vector:
+                trans_model: Callable[[List[Union[Vector, Matrix]]], Vector],
+                coordinator: Callable[[Vector, Vector], Vector]) -> Vector:
     subj_vec, verb_mat, obj_vec, subj2_vec = vects
     return coordinator(trans_model([subj_vec, verb_mat, obj_vec]),
                        trans_model([subj2_vec, verb_mat, obj_vec]))

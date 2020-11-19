@@ -4,7 +4,7 @@ from tensorskipgram.evaluation.spaces import Vector, Matrix, VectorSpace, Matrix
 
 class CompositionModel(object):
     def __init__(self, name: str, vector_space: VectorSpace, matrix_space: MatrixSpace,
-                 composer: Callable[List[Union[Vector, Matrix]], Vector]):
+                 composer: Callable[[List[Union[Vector, Matrix]]], Vector]):
         self._name = name
         self._vector_space = vector_space
         self._matrix_space = matrix_space
@@ -21,7 +21,7 @@ class CompositionModel(object):
 class CompositionTwoModel(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
-                 composer: Callable[List[Union[Vector, Matrix]], Vector]):
+                 composer: Callable[[List[Union[Vector, Matrix]]], Vector]):
         self._name = name
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
@@ -39,7 +39,7 @@ class CompositionTwoModel(object):
 class CompositionTwoModelMix(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
-                 composer: Callable[List[Union[Vector, Matrix]], Vector],
+                 composer: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
         self._name = name
         self._vector_space = vector_space

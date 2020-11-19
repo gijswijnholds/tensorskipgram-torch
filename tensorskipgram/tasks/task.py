@@ -6,9 +6,9 @@ Samples = List[Sample]
 
 
 class Task(Generic[Sample]):
-    def __init__(self, name: str, data: Samples,
-                 get_nouns: Callable[Sample, List[str]],
-                 get_verbs: Callable[Sample, List[str]]) -> None:
+    def __init__(self, name: str, data: List[Tuple[str, str, float]],
+                 get_nouns: Callable[[str, str], List[str]],
+                 get_verbs: Callable[[str, str], List[str]]) -> None:
         self._name = name
         self._data = data
         self._nouns = list(set([get_nouns(s1, s2) for (s1, s2, sc) in data]))

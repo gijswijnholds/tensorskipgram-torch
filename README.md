@@ -7,12 +7,19 @@ Gijs Wijnholds and Mehrnoosh Sadrzadeh. *Representation Learning for Type-Driven
 If you use any of this code or the available representations, or you made any other use of this repository, please cite
 
 ```
-@inproceedings{wijnholds2019representation,
-  title = "Representation Learning for Type-Driven Composition",
-  author = "Gijs Wijnholds and Mehrnoosh Sadrzadeh and Stephen Clark",
-  year = "2020",
-  booktitle={Proceedings of the 2020 Conference on Natural Language Learning (CoNLL) Volume 1 (Long Papers)},
-  publisher={Association for Computational Linguistics}
+@inproceedings{wijnholds-etal-2020-representation,
+    title = "Representation Learning for Type-Driven Composition",
+    author = "Wijnholds, Gijs  and
+      Sadrzadeh, Mehrnoosh  and
+      Clark, Stephen",
+    booktitle = "Proceedings of the 24th Conference on Computational Natural Language Learning",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.conll-1.24",
+    pages = "313--324",
+    abstract = "This paper is about learning word representations using grammatical type information. We use the syntactic types of Combinatory Categorial Grammar to develop multilinear representations, i.e. maps with n arguments, for words with different functional types. The multilinear maps of words compose with each other to form sentence representations. We extend the skipgram algorithm from vectors to multi- linear maps to learn these representations and instantiate it on unary and binary maps for transitive verbs. These are evaluated on verb and sentence similarity and disambiguation tasks and a subset of the SICK relatedness dataset. Our model performs better than previous type- driven models and is competitive with state of the art representation learning methods such as BERT and neural sentence encoders.",
 }
 ```
 
@@ -24,10 +31,11 @@ We publish the models of our proposed method, which are a pair of matrix represe
 
 We do *not* provide the verb cube model or the ablation matrix model, as they underperform and are too large to reasonably store online.
 
-| Model Name    | Dimensions | Vectors                  | Tensors                  |
-| ------------- |:----------:| :----------------------: | :----------------------: |
-| Mat x Subj    | 100x100    | [link][skipgram_vectors] | [link][mat_subj_matrices]|
-| Mat x Obj     | 100x100    | [link][skipgram_vectors] | [link][mat_obj_matrices] |
+| Model Name    | Dimensions | Link to Embeddings       |
+| ------------- |:----------:| :----------------------: |
+| Noun          | 100        | [link][skipgram_vectors] |
+| *Mat* x Subj  | 100x100    | [link][mat_subj_matrices]|
+| *Mat* x Obj   | 100x100    | [link][mat_obj_matrices] |
 
 [skipgram_vectors]: https://ln2.sync.com/dl/9fbd93010/dd7rbij3-7vb8zkh2-87xf8mwk-wb9xvta6
 [mat_subj_matrices]: https://ln2.sync.com/dl/dcafc01e0/2fvmq7tb-d2e6nnn7-7vnhviya-99kkb4bx

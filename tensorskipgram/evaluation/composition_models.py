@@ -39,13 +39,15 @@ class CompositionTwoModel(object):
 class CompositionTwoModelMix(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
-                 composer: Callable[[List[Union[Vector, Matrix]]], Vector],
+                 composer1: Callable[[List[Union[Vector, Matrix]]], Vector],
+                 composer2: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
         self._name = name
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2
-        self._composer = composer
+        self._composer1 = composer1
+        self._composer2 = composer2
         self._alpha = alpha
 
     @property

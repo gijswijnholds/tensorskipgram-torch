@@ -21,11 +21,11 @@ skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_con
 
 
 def make_concrete_model(name, model_class, composer):
-    return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats)
+    return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats, composer)
 
 
 def make_concrete_mix_model(name, model_class, composer_subj, composer_obj, alpha: float):
-    return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats, alpha)
+    return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats, composer_subj, composer_obj, alpha)
 
 
 """ Intransitive Models """

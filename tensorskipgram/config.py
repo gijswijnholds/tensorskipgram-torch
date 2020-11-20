@@ -22,12 +22,12 @@ model_path_subj = os.path.join(base_folder, 'verb_data/matrixskipgram_subj')
 model_path_obj = os.path.join(base_folder, 'verb_data/matrixskipgram_obj')
 
 
-model_path_subj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_subj_bs=11_lr=0.001_epoch1.p')
-model_path_obj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_obj_bs=11_lr=0.001_epoch1.p')
+# model_path_subj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_subj_bs=11_lr=0.001_epoch1.p')
+# model_path_obj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_obj_bs=11_lr=0.001_epoch1.p')
 
-# 
-# model_path_subj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_subj_context_obj.txt')
-# model_path_obj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_obj_context_subj.txt')
+#
+model_path_subj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_subj_context_obj.txt')
+model_path_obj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_obj_context_subj.txt')
 
 
 # subj_i2w = my_preproc.preproc['subj']['i2w']

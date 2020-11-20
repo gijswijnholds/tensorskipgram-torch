@@ -21,7 +21,7 @@ def read_vectors(space_fn: str) -> Dict:
 def read_matrices(space_fn: str) -> Dict:
     spaceFile = open(space_fn, 'r')
     space = {}
-    print("Loading vectors...")
+    print("Loading matrices...")
     for ln in tqdm(spaceFile.readlines()):
         ln = ln.strip().split()
         key = ln[0]

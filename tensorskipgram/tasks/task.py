@@ -11,8 +11,8 @@ class Task(Generic[Sample]):
                  get_verbs: Callable[[str, str], List[str]]) -> None:
         self._name = name
         self._data = data
-        self._nouns = list(set([get_nouns(s1, s2) for (s1, s2, sc) in data]))
-        self._verbs = list(set([get_verbs(s1, s2) for (s1, s2, sc) in data]))
+        self._nouns = list(set([n for (s1, s2, sc) in data for n in get_nouns(s1, s2)]))
+        self._verbs = list(set([v for (s1, s2, sc) in data for v in get_verbs(s1, s2)]))
 
     @property
     def name(self) -> str:

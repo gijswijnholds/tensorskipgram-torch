@@ -30,6 +30,15 @@ model_path_subj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1
 model_path_obj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_obj_context_subj.txt')
 
 
+exp_base_folder = '/homes/gjw30/ExpCode/compdisteval/experiment_data/'
+ml2008_path = os.path.join(exp_base_folder, 'ML2008/ML2008.txt')
+ml2010_path = os.path.join(exp_base_folder, 'ML2010/ML2010.txt')
+gs2011_path = os.path.join(exp_base_folder, 'GS2011/GS2011data.txt')
+ks2013_path = os.path.join(exp_base_folder, 'KS2013/KS2013-CoNLL.txt')
+ks2014_path = os.path.join(exp_base_folder, 'KS2014/KS2014.txt')
+elldis_path = os.path.join(exp_base_folder, 'WS2018/ELLDIS_CORRECTED.txt')
+ellsim_path = os.path.join(exp_base_folder, 'WS2018/ELLSIM_CORRECTED.txt')
+
 # subj_i2w = my_preproc.preproc['subj']['i2w']
 # obj_i2w = my_preproc.preproc['obj']['i2w']
 # verb_i2v = my_preproc.preproc['verb']['i2v']

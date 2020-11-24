@@ -52,6 +52,9 @@ class WordTag(object):
     def __str__(self):
         return "%s : %s" % (self.word, self.tag)
 
+    def __repr__(self):
+        return "%s : %s" % (self.word, self.tag)
+
 
 class Tag(object):
     NOUN = "NN"

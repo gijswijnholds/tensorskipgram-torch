@@ -18,6 +18,46 @@ class CompositionModel(object):
         pass
 
 
+class CompositionModelMid(object):
+    def __init__(self, name: str, vector_space: VectorSpace,
+                 matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
+                 composer: Callable[[List[Union[Vector, Matrix]]], Vector],
+                 alpha: float):
+        self._name = name
+        self._vector_space = vector_space
+        self._matrix_space1 = matrix_space1
+        self._matrix_space2 = matrix_space2
+        self._composer = composer
+        self._alpha = alpha
+
+    @property
+    def name(self):
+        return self._name
+
+    def __call__(self, sentence):
+        pass
+
+
+class CompositionModelLate(object):
+    def __init__(self, name: str, vector_space: VectorSpace,
+                 matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
+                 composer: Callable[[List[Union[Vector, Matrix]]], Vector],
+                 alpha: float):
+        self._name = name
+        self._vector_space = vector_space
+        self._matrix_space1 = matrix_space1
+        self._matrix_space2 = matrix_space2
+        self._composer = composer
+        self._alpha = alpha
+
+    @property
+    def name(self):
+        return self._name
+
+    def __call__(self, sentence):
+        pass
+
+
 class CompositionTwoModel(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,

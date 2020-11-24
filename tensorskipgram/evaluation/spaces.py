@@ -1,6 +1,7 @@
 from typing import Dict
 from tqdm import tqdm
 import numpy as np
+from tensorskipgram.tasks.task import WordTag
 
 Vector = np.ndarray
 Matrix = np.ndarray
@@ -37,8 +38,8 @@ class VectorSpace(object):
         self.name = name
         self.embedding = read_vectors(path)
 
-    def embed(self, word: str):
-        return self.embedding(word)
+    def embed(self, word_tag: WordTag):
+        return self.embedding[word_tag.word]
 
 
 class MatrixSpace(object):
@@ -46,5 +47,5 @@ class MatrixSpace(object):
         self.name = name
         self.embedding = read_matrices(path)
 
-    def embed(self, word):
-        return self.embedding(word)
+    def embed(self, word_tag: WordTag):
+        return self.embedding[word_tag.word]

@@ -11,8 +11,8 @@ from tensorskipgram.evaluation.composition_models import (CompositionModel,
                                                           CompositionModelMid,
                                                           CompositionModelLate,
                                                           CompositionModelTwo,
-                                                          IntransitiveModelMid,
-                                                          TransitiveModelMid,
+                                                          IntransitiveModel,
+                                                          TransitiveModel,
                                                           EllipsisModel,
                                                           IntransitiveModelMid,
                                                           TransitiveModelMid,
@@ -30,8 +30,13 @@ skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_
 skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_conc)
 
 
-def make_concrete_model(name, model_class: CompositionModel, composer):
-    return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats, composer)
+def make_concrete_model(name, model_class: CompositionModel, composer, setting):
+    assert setting in ['subj', 'obj']
+    if setting == 'subj':
+        mats = skipgram_subj_mats
+    elif setting == 'obj':
+        mats = skipgram_obj_mats
+    return model_class(name, skipgram_space, mats, composer)
 
 
 def make_concrete_model_mid(name, model_class: CompositionModelMid, composer, alpha: float):
@@ -46,26 +51,60 @@ def make_concrete_model_two(name, model_class: CompositionModelTwo, composer_sub
     return model_class(name, skipgram_space, skipgram_subj_mats, skipgram_obj_mats, composer_subj, composer_obj, alpha)
 
 
-""" Intransitive Models """
-cat_intrans_model = make_concrete_model_mid("CAT-sv", IntransitiveModelMid, cat_intrans, alpha=0.5)
+alphas = [a/10. for a in range(0, 11)]
 
+""" Intransitive Models """
+cat_intrans_model_subj = make_concrete_model("CAT-sv", IntransitiveModel, cat_intrans, setting='subj')
+cat_intrans_model_obj = make_concrete_model("CAT-sv", IntransitiveModel, cat_intrans, setting='obj')
+
+cat_intrans_models_mid = [make_concrete_model_mid("CAT-sv", IntransitiveModelMid, cat_intrans, alpha=a)
+                          for a in alphas]
+cat_intrans_models_late = [make_concrete_model_late("CAT-sv", IntransitiveModelLate, cat_intrans, alpha=a)
+                           for a in alphas]
 
 """ Transitive Models """
 
-cat_subject_model = make_concrete_model_mid("CATS-svo", TransitiveModelMid, cat_subject, alpha=0.5)
-cat_object_model = make_concrete_model_mid("CATO-svo", TransitiveModelMid, cat_subject, alpha=0.5)
-copy_subject_model = make_concrete_model_mid("copy-subject-svo", TransitiveModelMid, copy_subject, alpha=0.5)
-copy_object_model = make_concrete_model_mid("copy-object-svo", TransitiveModelMid, copy_object, alpha=0.5)
-frobenius_add_model = make_concrete_model_mid("frobenius-add-svo", TransitiveModelMid, frobenius_add, alpha=0.5)
-frobenius_mult_model = make_concrete_model_mid("frobenius-mult-svo", TransitiveModelMid, frobenius_mult, alpha=0.5)
+cat_subject_models_mid = [make_concrete_model_mid("CATS-svo", TransitiveModelMid, cat_subject, alpha=a)
+                          for a in alphas]
+cat_object_models_mid = [make_concrete_model_mid("CATO-svo", TransitiveModelMid, cat_subject, alpha=a)
+                         for a in alphas]
+copy_subject_models_mid = [make_concrete_model_mid("copy-subject-svo", TransitiveModelMid, copy_subject, alpha=a)
+                           for a in alphas]
+copy_object_models_mid = [make_concrete_model_mid("copy-object-svo", TransitiveModelMid, copy_object, alpha=a)
+                          for a in alphas]
+frobenius_add_models_mid = [make_concrete_model_mid("frobenius-add-svo", TransitiveModelMid, frobenius_add, alpha=a)
+                            for a in alphas]
+frobenius_mult_models_mid = [make_concrete_model_mid("frobenius-mult-svo", TransitiveModelMid, frobenius_mult, alpha=a)
+                             for a in alphas]
 
-alphas = [a/10. for a in range(0, 11)]
+trans_models_mid = (cat_subject_models_mid + cat_object_models_mid + copy_subject_models_mid +
+                    copy_object_models_mid + frobenius_add_models_mid + frobenius_mult_models_mid)
+
+cat_subject_models_late = [make_concrete_model_late("CATS-svo", TransitiveModelLate, cat_subject, alpha=a)
+                           for a in alphas]
+cat_object_models_late = [make_concrete_model_late("CATO-svo", TransitiveModelLate, cat_subject, alpha=a)
+                          for a in alphas]
+copy_subject_models_late = [make_concrete_model_late("copy-subject-svo", TransitiveModelLate, copy_subject, alpha=a)
+                            for a in alphas]
+copy_object_models_late = [make_concrete_model_late("copy-object-svo", TransitiveModelLate, copy_object, alpha=a)
+                           for a in alphas]
+frobenius_add_models_late = [make_concrete_model_late("frobenius-add-svo", TransitiveModelLate, frobenius_add, alpha=a)
+                             for a in alphas]
+frobenius_mult_models_late = [make_concrete_model_late("frobenius-mult-svo", TransitiveModelLate, frobenius_mult, alpha=a)
+                              for a in alphas]
+
+trans_models_late = (cat_subject_models_late + cat_object_models_late + copy_subject_models_late +
+                     copy_object_models_late + frobenius_add_models_late + frobenius_mult_models_late)
+
 copy_argument_models = [make_concrete_model_two("copy_argument-svo", TransitiveModelTwo,
                         copy_subject, copy_object, a) for a in alphas]
 copy_argument_sum_models = [make_concrete_model_two("copy-argument-sum-svo", TransitiveModelTwo,
                             copy_subject_sum, copy_object_sum, a) for a in alphas]
 cat_argument_models = [make_concrete_model_two("cat-argument-svo", TransitiveModelTwo,
                        cat_subject, cat_object, a) for a in alphas]
+
+trans_models_two = copy_argument_models + copy_argument_sum_models + cat_argument_models
+
 
 """ Ellipsis Models """
 ell_cat_subject_sum_model = make_concrete_model_mid("ell-cat-subject-sum-svos", EllipsisModelMid, ell_cat_subject_sum, alpha=0.5)

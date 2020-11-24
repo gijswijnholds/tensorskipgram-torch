@@ -23,7 +23,7 @@ class CompositionModelMid(object):
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
-        self._name = name
+        self._name = name + '-mid' + f'-alpha-{alpha}'
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2
@@ -43,7 +43,7 @@ class CompositionModelLate(object):
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
-        self._name = name
+        self._name = name + '-late' + f'-alpha-{alpha}'
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2
@@ -64,7 +64,7 @@ class CompositionModelTwo(object):
                  composer1: Callable[[List[Union[Vector, Matrix]]], Vector],
                  composer2: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
-        self._name = name
+        self._name = name + f'-alpha-{alpha}'
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2

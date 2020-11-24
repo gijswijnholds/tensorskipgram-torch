@@ -18,7 +18,7 @@ class CompositionModel(object):
         pass
 
 
-class CompositionModelMid(object):
+class CompositionModelEarly(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
@@ -38,7 +38,7 @@ class CompositionModelMid(object):
         pass
 
 
-class CompositionModelLate(object):
+class CompositionModelMid(object):
     def __init__(self, name: str, vector_space: VectorSpace,
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
@@ -107,7 +107,7 @@ class EllipsisModel(CompositionModel):
         self._composer([subj_vec, verb_mat, obj_vec, subj2_vec])
 
 
-class IntransitiveModelMid(CompositionModelMid):
+class IntransitiveModelEarly(CompositionModelEarly):
     def __call__(self, sentence: str) -> Vector:
         arg, verb = sentence
         arg_vec = self._vector_space.embed(arg)
@@ -117,7 +117,7 @@ class IntransitiveModelMid(CompositionModelMid):
         return self._composer([arg_vec, verb_mat])
 
 
-class TransitiveModelMid(CompositionModelMid):
+class TransitiveModelEarly(CompositionModelEarly):
     def __call__(self, sentence: str) -> Vector:
         subj, verb, obj = sentence
         subj_vec = self._vector_space.embed(subj)
@@ -128,7 +128,7 @@ class TransitiveModelMid(CompositionModelMid):
         return self._composer([subj_vec, verb_mat, obj_vec])
 
 
-class EllipsisModelMid(CompositionModelMid):
+class EllipsisModelEarly(CompositionModelEarly):
     def __call__(self, sentence: str) -> Vector:
         subj, verb, obj, coord, subj2, does, too = sentence
         subj_vec = self._vector_space.embed(subj)
@@ -140,7 +140,7 @@ class EllipsisModelMid(CompositionModelMid):
         return self._composer([subj_vec, verb_mat, obj_vec, subj2_vec])
 
 
-class IntransitiveModelLate(CompositionModelLate):
+class IntransitiveModelMid(CompositionModelMid):
     def __call__(self, sentence: str) -> Vector:
         arg, verb = sentence
         arg_vec = self._vector_space.embed(arg)
@@ -151,7 +151,7 @@ class IntransitiveModelLate(CompositionModelLate):
         return self._alpha * comp1 + ((1 - self._alpha) * comp2)
 
 
-class TransitiveModelLate(CompositionModelLate):
+class TransitiveModelMid(CompositionModelMid):
     def __call__(self, sentence: str) -> Vector:
         subj, verb, obj = sentence
         subj_vec = self._vector_space.embed(subj)
@@ -163,7 +163,7 @@ class TransitiveModelLate(CompositionModelLate):
         return self._alpha * comp1 + ((1 - self._alpha) * comp2)
 
 
-class EllipsisModelLate(CompositionModelLate):
+class EllipsisModelMid(CompositionModelMid):
     def __call__(self, sentence: str) -> Vector:
         subj, verb, obj, coord, subj2, does, too = sentence
         subj_vec = self._vector_space.embed(subj)
@@ -173,17 +173,6 @@ class EllipsisModelLate(CompositionModelLate):
         subj2_vec = self._vector_space.embed(subj2)
         comp1 = self._composer([subj_vec, verb_mat1, obj_vec, subj2_vec])
         comp2 = self._composer([subj_vec, verb_mat2, obj_vec, subj2_vec])
-        return self._alpha * comp1 + ((1 - self._alpha) * comp2)
-
-
-class IntransitiveModelTwo(CompositionModelTwo):
-    def __call__(self, sentence: str) -> Vector:
-        arg, verb = sentence
-        arg_vec = self._vector_space.embed(arg)
-        verb_mat1 = self._matrix_space1.embed(verb)
-        verb_mat2 = self._matrix_space2.embed(verb)
-        comp1 = self._composer1([arg_vec, verb_mat1])
-        comp2 = self._composer2([arg_vec, verb_mat2])
         return self._alpha * comp1 + ((1 - self._alpha) * comp2)
 
 

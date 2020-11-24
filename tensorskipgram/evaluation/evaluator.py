@@ -12,5 +12,5 @@ def cosine_sim(emb1, emb2) -> float:
 
 def evaluate_model_on_task(model: Callable[[str], Vector], task):
     """Calculate spearman rho between actual and predicted (cosine) similarity scores."""
-    preds, trues = zip(*[cosine_sim(model(s1), model(s2)) for (s1, s2, sc) in task.data])
+    preds, trues = zip(*[(cosine_sim(model(s1), model(s2)), sc) for (s1, s2, sc) in task.data])
     return spearmanr(preds, trues)

@@ -158,7 +158,7 @@ def create_gs2011(gs2011_path: str = 'GS2011/GS2011data.txt') -> GS2011:
         objWT = WordTag(lemmatise(lemmaMap_gs2011, obj), Tag.NOUN)
         verb2WT = WordTag(lemmatise(lemmaMap_gs2011, verb2), Tag.VERB)
         return (subjWT, verb1WT, objWT, subjWT, verb2WT, objWT, score)
-    name = "ML2010"
+    name = "GS2011"
     data = load_transitive_sentence_data(gs2011_path, ' ', process_line_gs2011)
     return GS2011(name, data, get_transitive_nouns, get_transitive_verbs)
 

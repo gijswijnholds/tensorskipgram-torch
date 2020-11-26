@@ -88,25 +88,49 @@ def ell_cat_object_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
     return ell_wrapper(vects, cat_object, mult)
 
 
-"""Two Map Transitive Models."""
+def ell_copy_subject_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_subject, add)
 
 
-def cat_argument(vects: List[Union[Vector, Matrix]], alpha: float) -> Vector:
-    subj_vec, subj_mat, obj_mat, obj_vec = vects
-    comp_subj = cat_subject([subj_vec, subj_mat, obj_vec])
-    comp_obj = cat_object([subj_vec, obj_mat, obj_vec])
-    return alpha * comp_subj + (1 - alpha) * comp_obj
+def ell_copy_subject_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_subject, mult)
 
 
-def copy_argument(vects: List[Union[Vector, Matrix]], alpha: float) -> Vector:
-    subj_vec, subj_mat, obj_mat, obj_vec = vects
-    comp_subj = copy_object([subj_vec, subj_mat, obj_vec])
-    comp_obj = copy_subject([subj_vec, obj_mat, obj_vec])
-    return alpha * comp_subj + (1 - alpha) * comp_obj
+def ell_copy_subject_sum_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_subject_sum, add)
 
 
-def copy_argument_sum(vects: List[Union[Vector, Matrix]], alpha: float) -> Vector:
-    subj_vec, subj_mat, obj_mat, obj_vec = vects
-    comp_subj = copy_object_sum([subj_vec, subj_mat, obj_vec])
-    comp_obj = copy_subject_sum([subj_vec, obj_mat, obj_vec])
-    return alpha * comp_subj + (1 - alpha) * comp_obj
+def ell_copy_subject_sum_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_subject_sum, mult)
+
+
+def ell_copy_object_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_object, add)
+
+
+def ell_copy_object_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_object, mult)
+
+
+def ell_copy_object_sum_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_object_sum, add)
+
+
+def ell_copy_object_sum_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, copy_object_sum, mult)
+
+
+def ell_frobenius_add_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, frobenius_add, add)
+
+
+def ell_frobenius_add_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, frobenius_add, mult)
+
+
+def ell_frobenius_mult_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, frobenius_mult, add)
+
+
+def ell_frobenius_mult_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
+    return ell_wrapper(vects, frobenius_mult, mult)

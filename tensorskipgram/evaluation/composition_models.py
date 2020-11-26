@@ -23,7 +23,7 @@ class CompositionModelEarly(object):
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
-        self._name = name + '-mid' + f'-alpha-{alpha}'
+        self._name = name + '-early' + f'-alpha-{alpha}'
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2
@@ -43,7 +43,7 @@ class CompositionModelMid(object):
                  matrix_space1: MatrixSpace, matrix_space2: MatrixSpace,
                  composer: Callable[[List[Union[Vector, Matrix]]], Vector],
                  alpha: float):
-        self._name = name + '-late' + f'-alpha-{alpha}'
+        self._name = name + '-mid' + f'-alpha-{alpha}'
         self._vector_space = vector_space
         self._matrix_space1 = matrix_space1
         self._matrix_space2 = matrix_space2
@@ -104,7 +104,7 @@ class EllipsisModel(CompositionModel):
         verb_mat = self._matrix_space.embed(verb)
         obj_vec = self._vector_space.embed(obj)
         subj2_vec = self._vector_space.embed(subj2)
-        self._composer([subj_vec, verb_mat, obj_vec, subj2_vec])
+        return self._composer([subj_vec, verb_mat, obj_vec, subj2_vec])
 
 
 class IntransitiveModelEarly(CompositionModelEarly):

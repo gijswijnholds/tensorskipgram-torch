@@ -1,17 +1,15 @@
 """Main code for extracting dependency data from a parsed corpus."""
 from collections import Counter
-from tensorskipgram.data.util import dump_obj_fn
-from tensorskipgram.data.training_data_creator import Preprocessor, DataCreator
-from tensorskipgram.data.ukwackypedia \
+from tensorskipgram.preprocessing.util import dump_obj_fn
+from tensorskipgram.preprocessing.training_data_creator import Preprocessor, DataCreator
+from tensorskipgram.preprocessing.ukwackypedia \
     import UKWackypedia, get_verb_args, merge_verb_triples
 from tensorskipgram.config \
-    import ukwackypedia_split_folder, svo_triples_fn, verblist_fn
-from tensorskipgram.config \
-    import noun_space_fn, preproc_fn, subj_data_fn, obj_data_fn
+    import (ukwackypedia_split_folder, svo_triples_fn, verblist_fn,
+            noun_space_fn, preproc_fn, subj_data_fn, obj_data_fn)
 from tensorskipgram.tasks.datasets \
-    import create_ml2008, create_ml2010, create_gs2011, create_ks2013
-from tensorskipgram.tasks.datasets \
-    import create_ks2014, create_elldis, create_ellsim
+    import (create_ml2008, create_ml2010, create_gs2011, create_ks2013
+            create_ks2014, create_elldis, create_ellsim)
 
 
 def extract_svo_triples(corpus_folder: str, out_fn: str) -> None:

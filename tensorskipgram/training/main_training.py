@@ -12,13 +12,13 @@ from tensorskipgram.training.trainer import train_epoch
 from torch.utils.data import DataLoader
 
 
-def prepare_model(arg: str, context: str, space_fn: str):
+def prepare_model(arg: str, context: str, space_fn: str,
+                  preproc_filename: str, triples_fn: str, verbs_fn: str):
     """Prepare a matrix-skipgram model with a preprocessor and a noun space."""
     assert arg in ['subj', 'obj']
     assert context in ['subj', 'obj']
     assert arg != context
-    preprocessor = Preprocessor(preproc_fn, space_fn, svo_triples_fn,
-                                verblist_fn).preproc
+    preprocessor = Preprocessor(preproc_filename, space_fn, triples_fn, verbs_fn).preproc
     arg_i2w, context_i2w = preprocessor[arg]['i2w'], preprocessor[context]['i2w']
     verb_i2v, lower2upper = preprocessor['verb']['i2v'], preprocessor['l2u']
     noun_vocab_size, context_vocab_size = len(arg_i2w), len(context_i2w)
@@ -32,10 +32,11 @@ def prepare_model(arg: str, context: str, space_fn: str):
 
 
 def train_model(arg: str, context: str, space_fn: str, model_path: str, arg_data_fn: str,
-                neg_k: int, batch_size: int, learning_rate: float, epochs: int = 1) -> List[float]:
+                neg_k: int, batch_size: int, learning_rate: float, epochs: int,
+                preproc_filename: str, triples_fn: str, verbs_fn: str) -> List[float]:
     """Train a matrix skipgram model."""
     print("Preparing model...")
-    model = prepare_model(arg, context, space_fn)
+    model = prepare_model(arg, context, space_fn, preproc_filename, triples_fn, verbs_fn)
 
     print("Preparing data loader...")
     dataset = MatrixSkipgramDataset(arg_data_fn, arg=arg, negk=5)
@@ -63,6 +64,10 @@ def train_model(arg: str, context: str, space_fn: str, model_path: str, arg_data
 
 def main():
     train_model('subj', 'obj', noun_space_fn, model_path_subj, subj_data_fn,
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1)
+                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1,
+                preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
+                verbs_fn=verblist_fn)
     train_model('obj', 'subj', noun_space_fn, model_path_obj, obj_data_fn,
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1)
+                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1,
+                preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
+                verbs_fn=verblist_fn)

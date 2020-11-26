@@ -54,6 +54,7 @@ def create_lower_to_upper(nouns: Set[str]) -> Dict[str, str]:
     noun_dict_lower.update(noun_dict)
     return noun_dict_lower
 
+# preprocessor = Preprocessor(preproc_fn, noun_space_fn, svo_triples_fn, verblist_fn)
 
 class Preprocessor(object):
     def __init__(self, preproc_fn: str, space_fn: str, verb_dict_fn: str, verbs_fn: str):
@@ -70,19 +71,25 @@ class Preprocessor(object):
             self.setup()
 
     def setup(self):
+        print("Loading nouns...")
         nouns = load_nouns(self.space_fn)
+        print("Filtering nouns...")
         check_nouns = set(nouns + [n.lower() for n in nouns])
         lower_to_upper = create_lower_to_upper(nouns)
+        print("Loading and sorting verbs...")
         i2v = sorted(list(set(load_verbs(self.verbs_fn))))
         v2i = {v: i for i, v in enumerate(i2v)}
+        print("Loading verb counts...")
         v2c = load_verb_counts(self.verb_dict_fn, i2v, check_nouns, stopwords)
         verb_preproc = {'i2v': i2v, 'v2i': v2i, 'v2c': v2c}
+        print("Creating argument preprocessors...")
         subj_i2w, subj_w2i, subj_i2c, subj_i2ns = get_argument_preproc(v2c, 0)
         obj_i2w, obj_w2i, obj_i2c, obj_i2ns = get_argument_preproc(v2c, 1)
         subj_preproc = {'i2w': subj_i2w, 'w2i': subj_w2i, 'i2c': subj_i2c, 'i2ns': subj_i2ns}
         obj_preproc = {'i2w': obj_i2w, 'w2i': obj_w2i, 'i2c': obj_i2c, 'i2ns': obj_i2ns}
         preproc = {'verb': verb_preproc, 'subj': subj_preproc, 'obj': obj_preproc, 'l2u': lower_to_upper}
         self.preproc = preproc
+        print("Dumping preprocessor...")
         dump_obj_fn(preproc, self.preproc_fn)
 
 

@@ -1,3 +1,4 @@
+import os
 import torch
 from tqdm import tqdm
 import numpy as np
@@ -41,6 +42,8 @@ class SkipgramDataset(Dataset):
 
 class MatrixSkipgramDataset(Dataset):
     def __init__(self, data_filename: str, arg: str, negk: int) -> None:
+        if not os.path.exists(data_filename):
+            print("Data not found, please run a data creator before training!")
         if data_filename.endswith('.npy'):
             print("Loading data...")
             data = np.load(data_filename, encoding='latin1').T

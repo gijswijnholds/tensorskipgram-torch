@@ -26,11 +26,11 @@ def evaluate_intransitive_models() -> None:
     ml2008, ml2010 = create_ml2008(ml2008_path), create_ml2010(ml2010_path)
     intrans_models = cat_intrans_models_early + cat_intrans_models_mid
     result_dict = {}
-    result_dict[ml2008.name + 'early-mid'] = {m.name: evaluate_model_on_task(m, ml2008)
+    result_dict[ml2008.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, ml2008)
                                               for m in tqdm(intrans_models)}
     result_dict[ml2008.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, ml2008, a)
                                           for (n, m1, m2) in tqdm(intrans_models_late) for a in alphas}
-    result_dict[ml2010.name + 'early-mid'] = {m.name: evaluate_model_on_task(m, ml2010)
+    result_dict[ml2010.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, ml2010)
                                               for m in tqdm(intrans_models)}
     result_dict[ml2010.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, ml2010, a)
                                           for (n, m1, m2) in tqdm(intrans_models_late) for a in alphas}

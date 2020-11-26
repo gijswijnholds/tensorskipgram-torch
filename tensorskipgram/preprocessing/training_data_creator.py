@@ -1,8 +1,7 @@
 import os
 import numpy as np
-import nltk
 from tqdm import tqdm
-from tensorskipgram.data.util import load_obj_fn, dump_obj_fn
+from tensorskipgram.data.util import load_obj_fn, dump_obj_fn, stopwords
 from typing import List, Set, Dict
 
 
@@ -16,10 +15,6 @@ def load_verbs(verbs_fn: str) -> List[str]:
     with open(verbs_fn, 'r') as file:
         verbs = [ln.strip() for ln in file.readlines()]
     return verbs
-
-
-def load_stopwords() -> Set[str]:
-    return set(nltk.corpus.stopwords.words('english') + ['cannot'])
 
 
 def load_verb_counts(verb_dict_fn: str, verbs: List[str], nouns: Set[str],
@@ -78,7 +73,6 @@ class Preprocessor(object):
         nouns = load_nouns(self.space_fn)
         check_nouns = set(nouns + [n.lower() for n in nouns])
         lower_to_upper = create_lower_to_upper(nouns)
-        stopwords = load_stopwords()
         i2v = sorted(list(set(load_verbs(self.verbs_fn))))
         v2i = {v: i for i, v in enumerate(i2v)}
         v2c = load_verb_counts(self.verb_dict_fn, i2v, check_nouns, stopwords)

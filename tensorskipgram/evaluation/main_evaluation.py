@@ -82,22 +82,19 @@ def evaluate_all_models() -> None:
 
 
 def get_max_results(result_dict: Dict) -> Dict:
+    """Compute the highest results for a dictionary of results."""
     return {k: round(result_dict[k][max(result_dict[k], key=lambda d: result_dict[k][d][0])][0], 3) for k in result_dict}
 
 
-def main_test() -> None:
-    ellipsis_results = evaluate_ellipsis_models()
-    max_res_ellipsis = get_max_results(ellipsis_results)
-    disKeys = list(set([k[:-10] for k in ellipsis_results['ELLDIS'].keys()]))
-    print(len(disKeys))
-    for k in disKeys:
-        print(k, '\n', [round(ellipsis_results['ELLDIS'][k + f'-alpha-{a}'][0], 3) for a in alphas])
-
 def main() -> None:
+    """Run all experiments on all tasks, and print the best results."""
+    intrans_results, trans_results, ellipsis_results = evaluate_all_models()
     max_res_intrans = get_max_results(intrans_results)
     max_res_trans = get_max_results(trans_results)
     max_res_ellipsis = get_max_results(ellipsis_results)
-    intrans_results, trans_results, ellipsis_results = evaluate_all_models()
-    max_res_intrans, max_res_trans, max_res_ellipsis = (get_max_results(intrans_results),
-                                                        get_max_results(trans_results),
-                                                        get_max_results(ellipsis_results))
+    for k in max_res_intrans.keys():
+        print(k, max_res_intrans[k])
+    for k in max_res_trans.keys():
+        print(k, max_res_trans[k])
+    for k in max_res_ellipsis.keys():
+        print(k, max_res_ellipsis[k])

@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from tqdm import tqdm
-from tensorskipgram.data.util import load_obj_fn, dump_obj_fn, stopwords
+from tensorskipgram.preprocessing.util import load_obj_fn, dump_obj_fn, stopwords
 from typing import List, Set, Dict
 
 

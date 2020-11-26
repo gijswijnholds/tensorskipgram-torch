@@ -120,7 +120,7 @@ def create_train_data(verbs, verb_counts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_
     print("Generating data...")
     verb_arrays = [create_train_data_verb(verb, verb_counts[verb], v2i, subj_w2i,
                                           obj_w2i, i2ns, arg, ns_k=ns_k)
-                  for verb in tqdm(verb_counts)]
+                   for verb in tqdm(verb_counts)]
     print("Concatenating arrays...")
     single_verb_arrays = np.concatenate(verb_arrays)
     print("Shuffling batches...")

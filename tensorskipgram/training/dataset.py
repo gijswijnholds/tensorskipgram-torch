@@ -4,7 +4,7 @@ import numpy as np
 from typing import Tuple, List, Dict
 from torch import LongTensor
 from torch.utils.data import Dataset
-from tensorskipgram.data.util import load_obj_fn
+from tensorskipgram.preprocessing.util import load_obj_fn
 
 
 def create_noun_matrix(space_fn: str, index2word: List[str], lower2upper: Dict):

@@ -1,6 +1,6 @@
 import torch
 from typing import List
-from tensorskipgram.preprocessing import Preprocessor
+from tensorskipgram.preprocessing.training_data_creator import Preprocessor
 from tensorskipgram.config \
     import preproc_fn, svo_triples_fn, verblist_fn, noun_space_fn
 from tensorskipgram.config \

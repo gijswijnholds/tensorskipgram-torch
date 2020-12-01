@@ -1,5 +1,6 @@
 """Main code for extracting dependency data from a parsed corpus."""
 from collections import Counter
+from typing import List
 from tensorskipgram.preprocessing.util import dump_obj_fn
 from tensorskipgram.preprocessing.training_data_creator import Preprocessor, DataCreator
 from tensorskipgram.preprocessing.ukwackypedia \
@@ -8,8 +9,15 @@ from tensorskipgram.config \
     import (ukwackypedia_split_folder, svo_triples_fn, verblist_fn,
             noun_space_fn, preproc_fn, subj_data_fn, obj_data_fn)
 from tensorskipgram.tasks.datasets \
-    import (create_ml2008, create_ml2010, create_gs2011, create_ks2013
+    import (create_men_verb, create_simlex_verb, create_verbsim, create_simverbdev,
+            create_simverbtest)
+from tensorskipgram.config import (menverb_path, simlex_path, verbsim_path,
+                                   simverbdev_path, simverbtest_path, relpron_path)
+from tensorskipgram.tasks.datasets \
+    import (create_ml2008, create_ml2010, create_gs2011, create_ks2013,
             create_ks2014, create_elldis, create_ellsim)
+from tensorskipgram.config import (ml2008_path, ml2010_path, gs2011_path, ks2013_path,
+                                   ks2014_path, elldis_path, ellsim_path)
 
 
 def extract_svo_triples(corpus_folder: str, out_fn: str) -> None:
@@ -27,12 +35,36 @@ def extract_svo_triples(corpus_folder: str, out_fn: str) -> None:
     dump_obj_fn(all_verbs_dict, out_fn)
 
 
+def get_relpron_verbs(relpron_fn: str) -> List[str]:
+    with open(relpron_fn, 'r') as in_file:
+        lines = in_file.readlines()
+    verbs = []
+    for ln in lines:
+        ln = ln.strip().split()
+        rel_type = ln[0]
+        if rel_type == 'SBJ':
+            verbs.append(ln[4][:-2])
+        elif rel_type == 'OBJ':
+            verbs.append(ln[5][:-2])
+    return verbs
+
+
 def extract_verbs(out_fn) -> None:
     """Extract all verbs and save to text file."""
-    all_verbs = list(set(create_ml2008().verbs + create_ml2010().verbs
-                         + create_gs2011().verbs + create_ks2013().verbs
-                         + create_ks2014().verbs + create_elldis().verbs
-                         + create_ellsim().verbs))
+    dataset_verbwts = (create_men_verb(menverb_path).verbs +
+                       create_verbsim(verbsim_path).verbs +
+                       create_simlex_verb(simlex_path).verbs +
+                       create_simverbdev(simverbdev_path).verbs +
+                       create_simverbtest(simverbtest_path).verbs +
+                       create_ml2008(ml2008_path).verbs +
+                       create_ml2010(ml2010_path).verbs +
+                       create_gs2011(gs2011_path).verbs +
+                       create_ks2013(ks2013_path).verbs +
+                       create_ks2014(ks2014_path).verbs +
+                       create_elldis(elldis_path).verbs +
+                       create_ellsim(ellsim_path).verbs)
+    dataset_verbs = [v.word for v in dataset_verbwts]
+    all_verbs = list(set(dataset_verbs + get_relpron_verbs(relpron_path)))
     with open(out_fn, 'w') as out_file:
         out_file.write('\n'.join(all_verbs))
 

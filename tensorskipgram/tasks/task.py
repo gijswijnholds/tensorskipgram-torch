@@ -31,9 +31,11 @@ class Task(Generic[Sample]):
         return self._verbs
 
 
+WordSimilaritySample = Tuple[str, str, float]
 SimilaritySample = Tuple[List[str], List[str], float]
 ClassSample = Tuple[List[str], List[str], int]
 
+WordSimilarityTask = Task[WordSimilaritySample]
 SimilarityTask = Task[SimilaritySample]
 DisambiguationTask = Task[ClassSample]
 

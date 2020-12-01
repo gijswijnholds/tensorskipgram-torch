@@ -40,6 +40,13 @@ ks2014_path = os.path.join(exp_base_folder, 'KS2014/KS2014.txt')
 elldis_path = os.path.join(exp_base_folder, 'WS2018/ELLDIS_CORRECTED.txt')
 ellsim_path = os.path.join(exp_base_folder, 'WS2018/ELLSIM_CORRECTED.txt')
 
+menverb_path = os.path.join(exp_base_folder, 'MEN/MEN_dataset_lemma_form_full')
+simlex_path = os.path.join(exp_base_folder, 'SimLex-999/SimLex-999.txt')
+verbsim_path = os.path.join(exp_base_folder, 'VerbSim/200601-GWC-130verbpairs.txt')
+simverbdev_path = os.path.join(exp_base_folder, 'SIMVERB3500/SimVerb-500-dev.txt')
+simverbtest_path = os.path.join(exp_base_folder, 'SIMVERB3500/SimVerb-3000-test.txt')
+relpron_path = os.path.join(exp_base_folder, 'RELPRON/relpron.test')
+
 # subj_i2w = my_preproc.preproc['subj']['i2w']
 # obj_i2w = my_preproc.preproc['obj']['i2w']
 # verb_i2v = my_preproc.preproc['verb']['i2v']

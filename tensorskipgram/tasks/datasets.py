@@ -1,9 +1,34 @@
 """Placeholder for the various datasets that we evaluate on."""
-from tensorskipgram.tasks.task import SimilarityTask, DisambiguationTask
-from tensorskipgram.tasks.task import SimilaritySample
-from tensorskipgram.tasks.task import Tag, WordTag
+from tensorskipgram.tasks.task import (Tag, WordTag, SimilaritySample,
+                                       WordSimilaritySample, SimilarityTask,
+                                       DisambiguationTask, WordSimilarityTask)
 import numpy as np
 from typing import List, Callable
+
+
+def get_wordsim_nouns(s1, s2) -> List[str]:
+    return [s1, s2]
+
+
+def get_wordsim_verbs(s1, s2) -> List[str]:
+    return [s1, s2]
+
+
+def load_wordsim_data(path, splitter, processLine, skipFirstLine=False):
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    if skipFirstLine:
+        lines = lines[1:]
+
+    wsData = []
+    # take only the first three elements (w1, w2, score)
+    for line in lines:
+        line = line.strip()
+        (wt1, wt2, score) = processLine(line.split(splitter))
+        wsData.append((wt1, wt2, float(score)))
+
+    return wsData
 
 
 def get_intransitive_nouns(s1, s2) -> List[str]:
@@ -96,6 +121,92 @@ def lemmatise(lemmamap, word):
     except KeyError:
         newWord = word
     return newWord
+
+
+class MENVerb(WordSimilarityTask):
+    pass
+
+
+def create_men_verb(path: str = 'MEN/MEN_dataset_lemma_form_full') -> MENVerb:
+    men_tag = {"-n": Tag.NOUN, "-j": Tag.ADJ, "-v": Tag.VERB}
+    def process_line_men(ln):
+        (w1, w2, score) = ln[:3]
+        if w1[-2:] != '-v' or w2[-2:] != '-v':
+            return ("", "", 0.0)
+        wt1 = WordTag(w1[:-2], men_tag[w1[-2:]])
+        wt2 = WordTag(w2[:-2], men_tag[w2[-2:]])
+        return (wt1, wt2, score)
+    name = "MEN-Verb"
+    data = load_wordsim_data(path, ' ', process_line_men, skipFirstLine=False)
+    data = [d for d in data if not isinstance(d[0], str)]
+    return MENVerb(name, data, get_wordsim_nouns, get_wordsim_verbs)
+
+
+
+class SimLexVerb(WordSimilarityTask):
+    pass
+
+
+def create_simlex_verb(path: str = 'SimLex-999/SimLex-999.txt') -> SimLexVerb:
+    posTagMap_simlex = {'A': Tag.ADJ, 'N': Tag.NOUN, 'V': Tag.VERB}
+    lemmaMap_simlex = {'teeth': 'tooth', 'men': 'man', 'august': 'August',
+                       'rattle': 'Rattle'}
+    def process_line_simlex(ln):
+        (w1, w2, pos, score) = ln[:4]
+        wt1 = WordTag(lemmatise(lemmaMap_simlex, w1), posTagMap_simlex[pos])
+        wt2 = WordTag(lemmatise(lemmaMap_simlex, w2), posTagMap_simlex[pos])
+        return (wt1, wt2, score)
+    name = "SimLex-Verb"
+    data = load_wordsim_data(path, '\t', process_line_simlex, skipFirstLine=True)[777:]
+    return SimLexVerb(name, data, get_wordsim_nouns, get_wordsim_verbs)
+
+
+class VerbSim(WordSimilarityTask):
+    pass
+
+
+def create_verbsim(path: str = 'VerbSim/200601-GWC-130verbpairs.txt') -> VerbSim:
+    def process_line_verbsim(ln):
+        (rank, w1, w2, score) = ln[:5]
+        if w2 == 'figure out':
+            w2 = 'calculate'
+        wt1 = WordTag(w1, Tag.VERB)
+        wt2 = WordTag(w2, Tag.VERB)
+        return (wt1, wt2, float(score))
+    name = "VerbSim"
+    data = load_wordsim_data(path, '\t', process_line_verbsim, skipFirstLine=True)
+    return VerbSim(name, data, get_wordsim_nouns, get_wordsim_verbs)
+
+
+class SimVerbDev(WordSimilarityTask):
+    pass
+
+
+def create_simverbdev(path: str = 'SIMVERB3500/SimVerb-500-dev.txt') -> SimVerbDev:
+    def process_line_simverbdev(ln):
+        (w1, w2, pos, score, rel) = ln[:5]
+        wt1 = WordTag(w1, Tag.VERB)
+        wt2 = WordTag(w2, Tag.VERB)
+        return (wt1, wt2, score)
+    name = "SimVerbDev"
+    data = load_wordsim_data(path, '\t', process_line_simverbdev, skipFirstLine=False)
+    return SimVerbDev(name, data, get_wordsim_nouns, get_wordsim_verbs)
+
+
+class SimVerbTest(WordSimilarityTask):
+    pass
+
+
+def create_simverbtest(path: str = 'SIMVERB3500/SimVerb-3000-test.txt') -> SimVerbTest:
+    def process_line_simverbdev(ln):
+        (w1, w2, pos, score, rel) = ln[:5]
+        wt1 = WordTag(w1, Tag.VERB)
+        wt2 = WordTag(w2, Tag.VERB)
+        return (wt1, wt2, score)
+    name = "SimVerbTest"
+    data = load_wordsim_data(path, '\t', process_line_simverbdev, skipFirstLine=False)
+    return SimVerbTest(name, data, get_wordsim_nouns, get_wordsim_verbs)
+
 
 
 class ML2008(SimilarityTask):
@@ -258,3 +369,15 @@ def create_ellsim(ellsim_path: str = 'WS2018/ELLSIM_CORRECTED.txt') -> ELLDIS:
     name = "ELLSIM"
     data = load_ellipsis_sentence_data(ellsim_path, '\t', process_line_ellsim)
     return ELLSIM(name, data, get_ellipsis_nouns, get_ellipsis_verbs)
+
+
+class PARAGAPS(SimilarityTask):
+    pass
+
+
+def create_paragaps(paragaps_path: str = '') -> PARAGAPS:
+    def process_line_paragaps(ln):
+        pass
+    name = "PARAGAPS"
+    data = load_paragaps_data(paragaps_path, process_line_paragaps)
+    return PARAGAPS(name, data, get_paragaps_nouns, get_paragaps_verbs)

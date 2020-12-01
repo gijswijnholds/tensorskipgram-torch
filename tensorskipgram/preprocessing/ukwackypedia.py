@@ -8,7 +8,7 @@ SVOTriple = Tuple[str, str, str]
 
 class UKWackypedia(object):
     def __init__(self, root_folder: str,
-                 transform: Optional[Callable[str, List[SVOTriple]]] = None):
+                 transform: Optional[Callable[[str], List[SVOTriple]]] = None):
         self.file_list = self.load_file_list(root_folder)
         self.transform = transform
 

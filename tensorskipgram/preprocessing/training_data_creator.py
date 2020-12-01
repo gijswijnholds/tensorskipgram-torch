@@ -54,7 +54,6 @@ def create_lower_to_upper(nouns: Set[str]) -> Dict[str, str]:
     noun_dict_lower.update(noun_dict)
     return noun_dict_lower
 
-# preprocessor = Preprocessor(preproc_fn, noun_space_fn, svo_triples_fn, verblist_fn)
 
 class Preprocessor(object):
     def __init__(self, preproc_fn: str, space_fn: str, verb_dict_fn: str, verbs_fn: str):
@@ -91,6 +90,19 @@ class Preprocessor(object):
         self.preproc = preproc
         print("Dumping preprocessor...")
         dump_obj_fn(preproc, self.preproc_fn)
+
+    def convert_ids_to_strings(self, data, arg: str):
+        """Take a tuple of args, funcs, contexts, and translate the ids to strings."""
+        assert arg in ['subj', 'obj']
+        func_i2w = self.preproc['verb']['i2v']
+        subj_i2w = self.preproc['subj']['i2w']
+        obj_i2w = self.preproc['obj']['i2w']
+        if arg == 'subj':
+            arg_i2w, context_i2w = subj_i2w, obj_i2w
+        elif arg == 'obj':
+            arg_i2w, context_i2w = subj_i2w, obj_i2w
+        return ([arg_i2w[t] for t in data[0]], [func_i2w[t] for t in data[1]],
+                [context_i2w[t] for t in data[2]], data[3])
 
 
 def create_train_data_verb(verb, counts, v2i, subj_w2i, obj_w2i, i2ns, arg, ns_k=5):

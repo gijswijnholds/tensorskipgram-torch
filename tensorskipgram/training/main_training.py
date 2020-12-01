@@ -31,19 +31,19 @@ def prepare_model(arg: str, context: str, space_fn: str,
                           embed_size=100, noun_matrix=noun_matrix)
 
 
-def train_model(arg: str, context: str, space_fn: str, model_path: str, arg_data_fn: str,
+def train_model(space_fn: str, model_path: str, arg_data_fn: str, arg: str, context: str,
                 neg_k: int, batch_size: int, learning_rate: float, epochs: int,
-                preproc_filename: str, triples_fn: str, verbs_fn: str) -> List[float]:
+                device: str, preproc_filename: str, triples_fn: str, verbs_fn: str) -> List[float]:
     """Train a matrix skipgram model."""
     print("Preparing model...")
     model = prepare_model(arg, context, space_fn, preproc_filename, triples_fn, verbs_fn)
 
     print("Preparing data loader...")
-    dataset = MatrixSkipgramDataset(arg_data_fn, arg=arg, negk=5)
+    dataset = MatrixSkipgramDataset(arg_data_fn, arg=context, negk=neg_k)
     dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size)
 
     print("Preparing optimiser + loss function...")
-    model.to(1)
+    model.to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loss_fn = torch.nn.BCEWithLogitsLoss()
 
@@ -51,7 +51,7 @@ def train_model(arg: str, context: str, space_fn: str, model_path: str, arg_data
     epoch_losses = []
     for i in range(epochs):
         epoch_loss = train_epoch(model, dataloader, loss_fn, optimiser,
-                                 device=1, epoch_idx=i+1)
+                                 device=device, epoch_idx=i+1)
         epoch_losses.append(epoch_loss)
         print("Saving model...")
         e = i+1
@@ -63,11 +63,15 @@ def train_model(arg: str, context: str, space_fn: str, model_path: str, arg_data
 
 
 def main():
-    train_model('subj', 'obj', noun_space_fn, model_path_subj, subj_data_fn,
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1,
+    train_model(noun_space_fn, model_path_subj, obj_data_fn, arg='subj', context='obj',
+                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
                 preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
                 verbs_fn=verblist_fn)
-    train_model('obj', 'subj', noun_space_fn, model_path_obj, obj_data_fn,
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1,
+    train_model(noun_space_fn, model_path_obj, subj_data_fn, arg='obj', context='subj',
+                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
                 preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
                 verbs_fn=verblist_fn)
+
+
+# fn1 = 'skipprob_data/training_data_combined_subject/train_data_proper_asym_ns=5.npy'
+# fn2 = verb_data/subj_train_data_1160.p

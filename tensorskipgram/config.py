@@ -8,7 +8,9 @@ svo_triples_fn = os.path.join(base_folder,
 noun_space_fn = os.path.join(base_folder,
                              'spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt')
 verblist_fn = os.path.join(base_folder, 'verb_data/all_1160_verbs.txt')
+# verblist_with_gaps_fn = os.path.join(base_folder, 'verb_data/all_1180_verbs.txt')
 verblist_sick_fn = os.path.join(base_folder, 'verb_data/sick_verbs_full.txt')
+verblist_paragaps_fn = os.path.join(base_folder, 'verb_data/allgappingverbs.txt')
 
 subj_data_fn = os.path.join(base_folder, 'verb_data/subj_train_data_1160.p')
 obj_data_fn = os.path.join(base_folder, 'verb_data/obj_train_data_1160.p')
@@ -21,6 +23,7 @@ preproc_fn = os.path.join(base_folder, 'verb_data/preprocessor_1160.p')
 
 model_path_subj = os.path.join(base_folder, 'verb_data/matrixskipgram_subj')
 model_path_obj = os.path.join(base_folder, 'verb_data/matrixskipgram_obj')
+
 
 
 # model_path_subj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_subj_bs=11_lr=0.001_epoch1.p')
@@ -46,7 +49,7 @@ verbsim_path = os.path.join(exp_base_folder, 'VerbSim/200601-GWC-130verbpairs.tx
 simverbdev_path = os.path.join(exp_base_folder, 'SIMVERB3500/SimVerb-500-dev.txt')
 simverbtest_path = os.path.join(exp_base_folder, 'SIMVERB3500/SimVerb-3000-test.txt')
 relpron_path = os.path.join(exp_base_folder, 'RELPRON/relpron.test')
-
+paragaps_path = os.path.join(exp_base_folder, 'PARGAP/pargaps_2020.txt')
 # subj_i2w = my_preproc.preproc['subj']['i2w']
 # obj_i2w = my_preproc.preproc['obj']['i2w']
 # verb_i2v = my_preproc.preproc['verb']['i2v']
@@ -84,3 +87,10 @@ relpron_path = os.path.join(exp_base_folder, 'RELPRON/relpron.test')
 # optGPU = torch.optim.Adam(obj_matskipgram_modelGPU.parameters(), lr=0.005)
 # loss_fnGPU = torch.nn.BCEWithLogitsLoss()
 # spaceInFN = '/import/gijs-shared/gijs/spaces/tensor_skipgram_vector_spaces/skipgram_100_nouns.txt'
+
+verblist_with_gaps_fn = os.path.join(base_folder, 'verb_data/all_1180_verbs.txt')
+preproc_gaps_fn = os.path.join(base_folder, 'verb_data/preprocessor_1180.p')
+subj_data_gaps_fn = os.path.join(base_folder, 'verb_data/subj_train_data_1180.p')
+obj_data_gaps_fn = os.path.join(base_folder, 'verb_data/obj_train_data_1180.p')
+model_path_subj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_subj')
+model_path_obj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_obj')

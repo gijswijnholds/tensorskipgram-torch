@@ -199,3 +199,13 @@ class EllipsisModelTwo(CompositionModelTwo):
         comp1 = self._composer1([subj_vec, verb_mat1, obj_vec, subj2_vec])
         comp2 = self._composer2([subj_vec, verb_mat2, obj_vec, subj2_vec])
         return self._alpha * comp1 + ((1 - self._alpha) * comp2)
+
+
+class ParagapsModel(CompositionModel):
+    def __call__(self, sentence: List[str]) -> Vector:
+        adj1, noun1, verb1, adj2, noun2, verb2 = sentence
+        noun1_vec = self._vector_space.embed(noun1)
+        noun2_vec = self._vector_space.embed(noun2)
+        verb1_mat = self._matrix_space.embed(verb1)
+        verb2_mat = self._matrix_space.embed(verb2)
+        return self._composer([noun1_vec, verb1_mat, noun2_vec, verb2_mat])

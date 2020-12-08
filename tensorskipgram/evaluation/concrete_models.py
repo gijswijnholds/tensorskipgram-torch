@@ -17,6 +17,8 @@ from tensorskipgram.evaluation.composition_models \
             IntransitiveModelMid, TransitiveModelMid, EllipsisModelMid,
             TransitiveModelTwo, EllipsisModelTwo)
 from tensorskipgram.config import noun_space_fn, model_path_subj_conc, model_path_obj_conc
+from tensorskipgram.evaluation.composition_models import ParagapsModel
+from tensorskipgram.evaluation.composers import paragaps_basic
 
 skipgram_space = VectorSpace(name="skipgram100", path=noun_space_fn)
 skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_conc)
@@ -340,3 +342,6 @@ ell_models_late = ell_models_late_sum + ell_models_late_mult
 # catArgModelsMiddle = [TransitiveModelTensorSeparateMiddle("Cat Argument_%s" % a, "CatArg_%s" % a, cat_subject, cat_object, a) for a in alphas]
 
 # catArgModelsLate = [TransitiveModelTensorSeparateLate("Cat Argument_%s" % a, "CatArg_%s" % a, cat_subject, cat_object, a) for a in alphas]
+
+paragaps_model_basic_subj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='subj')
+paragaps_model_basic_obj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='obj')

@@ -1,6 +1,8 @@
 """Evaluate some models on evaluation tasks."""
 from tqdm import tqdm
 from typing import Dict
+from tensorskipgram.tasks.datasets import create_paragaps
+from tensorskipgram.config import paragaps_path
 from tensorskipgram.tasks.datasets \
     import (create_ml2008, create_ml2010, create_gs2011, create_ks2013,
             create_ks2014, create_elldis, create_ellsim)
@@ -12,6 +14,8 @@ from tensorskipgram.evaluation.evaluator \
     import (evaluate_model_on_task, evaluate_model_on_task_late_fusion)
 from tensorskipgram.config import (ml2008_path, ml2010_path, gs2011_path, ks2013_path,
                                    ks2014_path, elldis_path, ellsim_path)
+from tensorskipgram.evaluation.concrete_models \
+    import paragaps_model_basic_subj, paragaps_model_basic_obj
 
 
 def evaluate_intransitive_models() -> None:

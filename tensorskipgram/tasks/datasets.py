@@ -1,7 +1,9 @@
 """Placeholder for the various datasets that we evaluate on."""
 from tensorskipgram.tasks.task import (Tag, WordTag, SimilaritySample,
                                        WordSimilaritySample, SimilarityTask,
-                                       DisambiguationTask, WordSimilarityTask)
+                                       DisambiguationTask, WordSimilarityTask,
+                                       ClassSample)
+from tensorskipgram.tasks.util import paragaps_noun_map, paragaps_verb_map
 import numpy as np
 from typing import List, Callable
 
@@ -371,13 +373,52 @@ def create_ellsim(ellsim_path: str = 'WS2018/ELLSIM_CORRECTED.txt') -> ELLDIS:
     return ELLSIM(name, data, get_ellipsis_nouns, get_ellipsis_verbs)
 
 
-class PARAGAPS(SimilarityTask):
+def load_paragaps_data(path: str, process_line: Callable) -> List[ClassSample]:
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    real_lines = lines[1:]
+    pargaps_data = []
+    for i in range(0, len(real_lines), 2):
+        ln1, ln2 = real_lines[i], real_lines[i+1]
+        ln1, ln2 = ln1.strip().split()[1:], ln2.strip().split()[1:]
+        assert ln1[0] == ln2[0]
+        (sent1, lab1), (sent2, lab2) = process_line(ln1), process_line(ln2)
+        landmark_sent = sent1[:3] + sent1[4:]
+        if lab1 == 1:
+            good_sent, bad_sent = sent1, sent2
+        elif lab2 == 1:
+            good_sent, bad_sent = sent2, sent1
+        sn1 = landmark_sent
+        sn2 = landmark_sent[:2] + (good_sent[3],) + landmark_sent[3:]
+        sn3 = landmark_sent[:2] + (bad_sent[3],) + landmark_sent[3:]
+        pargaps_data.append((sn1, sn2, sn3))
+    return pargaps_data
+
+
+class PARAGAPS(DisambiguationTask):
     pass
 
 
-def create_paragaps(paragaps_path: str = '') -> PARAGAPS:
+def get_paragaps_nouns(s1, s2) -> List[str]:
+    return [s1[1], s1[4], s2[1], s2[4]]
+
+
+def get_paragaps_verbs(s1, s2) -> List[str]:
+    return [s1[2], s1[-1], s2[2], s2[-1]]
+
+
+def create_paragaps(paragaps_path: str = 'PARGAP/pargaps_2020.txt') -> PARAGAPS:
     def process_line_paragaps(ln):
-        pass
+        (adj1, noun1, verb1, verb2, adj2, noun2, verb3), label = ln[:-1], int(ln[-1])
+        adj1WT = WordTag(lemmatise(paragaps_noun_map, adj1), Tag.ADJ)
+        noun1WT = WordTag(lemmatise(paragaps_noun_map, noun1), Tag.NOUN)
+        verb1WT = WordTag(lemmatise(paragaps_verb_map, verb1), Tag.VERB)
+        verb2WT = WordTag(lemmatise(paragaps_verb_map, verb2), Tag.VERB)
+        adj2WT = WordTag(lemmatise(paragaps_noun_map, adj2), Tag.ADJ)
+        noun2WT = WordTag(lemmatise(paragaps_noun_map, noun2), Tag.NOUN)
+        verb3WT = WordTag(lemmatise(paragaps_verb_map, verb3), Tag.VERB)
+        return (adj1WT, noun1WT, verb1WT, verb2WT, adj2WT, noun2WT, verb3WT), label
     name = "PARAGAPS"
     data = load_paragaps_data(paragaps_path, process_line_paragaps)
     return PARAGAPS(name, data, get_paragaps_nouns, get_paragaps_verbs)

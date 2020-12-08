@@ -5,6 +5,10 @@ from tensorskipgram.config \
     import preproc_fn, svo_triples_fn, verblist_fn, noun_space_fn
 from tensorskipgram.config \
     import model_path_subj, model_path_obj, subj_data_fn, obj_data_fn
+from tensorskipgram.config \
+    import preproc_gaps_fn, verblist_with_gaps_fn
+from tensorskipgram.config \
+    import model_path_subj_gaps, model_path_obj_gaps, subj_data_gaps_fn, obj_data_gaps_fn
 from tensorskipgram.training.model import MatrixSkipgram
 from tensorskipgram.training.dataset \
     import MatrixSkipgramDataset, create_noun_matrix
@@ -63,15 +67,24 @@ def train_model(space_fn: str, model_path: str, arg_data_fn: str, arg: str, cont
 
 
 def main():
-    train_model(noun_space_fn, model_path_subj, obj_data_fn, arg='subj', context='obj',
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
-                preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
-                verbs_fn=verblist_fn)
-    train_model(noun_space_fn, model_path_obj, subj_data_fn, arg='obj', context='subj',
-                neg_k=5, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
-                preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
-                verbs_fn=verblist_fn)
+    train_model(noun_space_fn, model_path_subj_gaps, obj_data_gaps_fn, arg='subj', context='obj',
+                neg_k=10, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
+                preproc_filename=preproc_gaps_fn, triples_fn=svo_triples_fn,
+                verbs_fn=verblist_with_gaps_fn)
+    train_model(noun_space_fn, model_path_obj_gaps, subj_data_gaps_fn, arg='obj', context='subj',
+                neg_k=10, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
+                preproc_filename=preproc_gaps_fn, triples_fn=svo_triples_fn,
+                verbs_fn=verblist_with_gaps_fn)
 
 
+# def main():
+#     train_model(noun_space_fn, model_path_subj, obj_data_fn, arg='subj', context='obj',
+#                 neg_k=10, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
+#                 preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
+#                 verbs_fn=verblist_fn)
+#     train_model(noun_space_fn, model_path_obj, subj_data_fn, arg='obj', context='subj',
+#                 neg_k=10, batch_size=11, learning_rate=0.001, epochs=1, device='cuda',
+#                 preproc_filename=preproc_fn, triples_fn=svo_triples_fn,
+#                 verbs_fn=verblist_fn)
 # fn1 = 'skipprob_data/training_data_combined_subject/train_data_proper_asym_ns=5.npy'
 # fn2 = verb_data/subj_train_data_1160.p

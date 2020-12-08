@@ -134,3 +134,9 @@ def ell_frobenius_mult_sum(vects: List[Union[Vector, Matrix]]) -> Vector:
 
 def ell_frobenius_mult_mult(vects: List[Union[Vector, Matrix]]) -> Vector:
     return ell_wrapper(vects, frobenius_mult, mult)
+
+
+"""Parasitic Gap Models."""
+def paragaps_basic(vects: List[Union[Vector, Matrix]]) -> Vector:
+    noun1_vec, verb1_mat, noun2_vec, verb2_mat = vects
+    return cat_intrans(vects[:2]) + cat_intrans(vects[2:])

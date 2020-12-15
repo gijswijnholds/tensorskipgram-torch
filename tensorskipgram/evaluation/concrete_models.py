@@ -17,13 +17,16 @@ from tensorskipgram.evaluation.composition_models \
             IntransitiveModelMid, TransitiveModelMid, EllipsisModelMid,
             TransitiveModelTwo, EllipsisModelTwo)
 from tensorskipgram.config import noun_space_fn, model_path_subj_conc, model_path_obj_conc
+from tensorskipgram.config import model_out_path_subj_gaps, model_out_path_obj_gaps
+from tensorskipgram.config import model_out_path_subj_gaps2, model_out_path_obj_gaps2
 from tensorskipgram.evaluation.composition_models import ParagapsModel
 from tensorskipgram.evaluation.composers import paragaps_basic
-
+from tensorskipgram.config import model_out_path_subj_gapss, model_out_path_obj_gapss
 skipgram_space = VectorSpace(name="skipgram100", path=noun_space_fn)
-skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_conc)
-skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_conc)
-
+# skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_conc)
+# skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_conc)
+# skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_out_path_subj_gaps2)
+# skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_out_path_obj_gaps2)
 
 def make_concrete_model(name, model_class: CompositionModel, composer, setting: str):
     assert setting in ['subj', 'obj']

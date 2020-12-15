@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from tqdm import tqdm
 import numpy as np
 from tensorskipgram.tasks.task import WordTag
@@ -38,8 +38,11 @@ class VectorSpace(object):
         self.name = name
         self.embedding = read_vectors(path)
 
-    def embed(self, word_tag: WordTag):
-        return self.embedding[word_tag.word]
+    def embed(self, word_or_wordtag: Union[WordTag, str]):
+        if isinstance(word_or_wordtag, str):
+            return self.embedding[word_or_wordtag]
+        else:
+            return self.embedding[word_or_wordtag.word]
 
 
 class MatrixSpace(object):

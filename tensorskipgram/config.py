@@ -25,11 +25,10 @@ model_path_subj = os.path.join(base_folder, 'verb_data/matrixskipgram_subj')
 model_path_obj = os.path.join(base_folder, 'verb_data/matrixskipgram_obj')
 
 
-
 # model_path_subj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_subj_bs=11_lr=0.001_epoch1.p')
 # model_path_obj_conc = os.path.join(base_folder, 'verb_data/matrixskipgram_obj_bs=11_lr=0.001_epoch1.p')
 
-#
+
 model_path_subj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_subj_context_obj.txt')
 model_path_obj_conc = os.path.join(base_folder, 'spaces/conll_spaces/matrices_1160_arg_obj_context_subj.txt')
 
@@ -94,3 +93,21 @@ subj_data_gaps_fn = os.path.join(base_folder, 'verb_data/subj_train_data_1180.p'
 obj_data_gaps_fn = os.path.join(base_folder, 'verb_data/obj_train_data_1180.p')
 model_path_subj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_subj')
 model_path_obj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_obj')
+model_out_path_subj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_arg_subj_context_obj.txt')
+model_out_path_obj_gaps = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_arg_obj_context_subj.txt')
+
+model_out_path_subj_gaps2 = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_arg_subj_context_obj_bs=110.txt')
+model_out_path_obj_gaps2 = os.path.join(base_folder, 'verb_data/matrixskipgram_pargaps_arg_obj_context_subj_bs=110.txt')
+
+model_out_path_subj_gapss = [os.path.join(base_folder, f'verb_data/matrixskipgram_pargaps_arg_subj_context_obj_bs=110_epoch={e}.txt')
+                             for e in [1,2,3,4,5]]
+model_out_path_obj_gapss = [os.path.join(base_folder, f'verb_data/matrixskipgram_pargaps_arg_obj_context_subj_bs=110_epoch={e}.txt')
+                            for e in [1,2,3,4,5]]
+
+relational_mats_out_fn = os.path.join(base_folder, 'verb_data/relational_tensors_1180_verbs.txt')
+kronecker_mats_out_fn = os.path.join(base_folder, 'verb_data/kronecker_tensors_1180_verbs.txt')
+bert_mats_out_fn = os.path.join(base_folder, 'verb_data/relational_bert_tensors_1180_verbs.txt')
+bert_in_context_mats_out_fn = os.path.join(base_folder, 'verb_data/relational_context_bert_tensors_1180_verbs.txt')
+
+bert_space_fn = os.path.join(base_folder, 'spaces/bert_vectors/bert_768_nouns.txt')
+kronecker_bert_mats_out_fn = os.path.join(base_folder, 'spaces/bert_vectors/kronecker_bert_tensors_1180_verbs.txt')

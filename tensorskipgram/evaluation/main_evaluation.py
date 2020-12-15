@@ -9,13 +9,14 @@ from tensorskipgram.tasks.datasets \
 from tensorskipgram.evaluation.concrete_models \
     import (cat_intrans_models_early, cat_intrans_models_mid, intrans_models_late,
             trans_models_early, trans_models_mid, trans_models_two, trans_models_late,
-            ell_models_early, ell_models_mid, ell_models_late, alphas)
+            ell_models_early, ell_models_mid, ell_models_late, alphas,
+            ell_copying_models3, ell_copying_models4, ell_copying_models5)
 from tensorskipgram.evaluation.evaluator \
     import (evaluate_model_on_task, evaluate_model_on_task_late_fusion)
 from tensorskipgram.config import (ml2008_path, ml2010_path, gs2011_path, ks2013_path,
                                    ks2014_path, elldis_path, ellsim_path)
-from tensorskipgram.evaluation.concrete_models \
-    import paragaps_model_basic_subj, paragaps_model_basic_obj
+# from tensorskipgram.evaluation.concrete_models \
+#     import paragaps_model_basic_subj, paragaps_model_basic_obj
 
 
 def evaluate_intransitive_models() -> None:
@@ -54,19 +55,23 @@ def evaluate_transitive_models() -> None:
     return result_dict
 
 
-def evaluate_ellipsis_models() -> None:
+def evaluate_ellipsis_models(models) -> None:
     """Load all tasks, and models, and compute spearman correlations."""
     elldis, ellsim = create_elldis(elldis_path), create_ellsim(ellsim_path)
-    ell_models = ell_models_early + ell_models_mid
+    ell_models = models  # ell_copying_models3
     result_dict = {}
-    result_dict[elldis.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, elldis)
-                                               for m in tqdm(ell_models)}
-    result_dict[elldis.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, elldis, a)
-                                          for (n, m1, m2) in tqdm(ell_models_late) for a in alphas}
-    result_dict[ellsim.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, ellsim)
-                                               for m in tqdm(ell_models)}
-    result_dict[ellsim.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, ellsim, a)
-                                          for (n, m1, m2) in tqdm(ell_models_late) for a in alphas}
+    result_dict[elldis.name] = {m.name: evaluate_model_on_task(m, elldis) for m in tqdm(ell_models)}
+    result_dict[ellsim.name] = {m.name: evaluate_model_on_task(m, ellsim) for m in tqdm(ell_models)}
+    # ell_models = ell_models_early + ell_models_mid
+    # result_dict = {}
+    # result_dict[elldis.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, elldis)
+    #                                            for m in tqdm(ell_models)}
+    # result_dict[elldis.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, elldis, a)
+    #                                       for (n, m1, m2) in tqdm(ell_models_late) for a in alphas}
+    # result_dict[ellsim.name + '-early-mid'] = {m.name: evaluate_model_on_task(m, ellsim)
+    #                                            for m in tqdm(ell_models)}
+    # result_dict[ellsim.name + '-late'] = {n + f'-alpha-{a}': evaluate_model_on_task_late_fusion(m1, m2, ellsim, a)
+    #                                       for (n, m1, m2) in tqdm(ell_models_late) for a in alphas}
     return result_dict
 
 
@@ -85,13 +90,20 @@ def get_max_results(result_dict: Dict) -> Dict:
 
 def main() -> None:
     """Run all experiments on all tasks, and print the best results."""
-    intrans_results, trans_results, ellipsis_results = evaluate_all_models()
-    max_res_intrans = get_max_results(intrans_results)
-    max_res_trans = get_max_results(trans_results)
-    max_res_ellipsis = get_max_results(ellipsis_results)
-    for k in max_res_intrans.keys():
-        print(k, max_res_intrans[k])
-    for k in max_res_trans.keys():
-        print(k, max_res_trans[k])
-    for k in max_res_ellipsis.keys():
-        print(k, max_res_ellipsis[k])
+    glove_results = evaluate_ellipsis_models(ell_copying_models3)
+    glove_results_cor = {k: {i: glove_results[k][i][0] for i in glove_results[k]} for k in glove_results}
+    fasttext_results = evaluate_ellipsis_models(ell_copying_models4)
+    fasttext_results_cor = {k: {i: fasttext_results[k][i][0] for i in fasttext_results[k]} for k in fasttext_results}
+    word2vec_results = evaluate_ellipsis_models(ell_copying_models5)
+    word2vec_results_cor = {k: {i: word2vec_results[k][i][0] for i in word2vec_results[k]} for k in word2vec_results}
+    return glove_results_cor, fasttext_results_cor, word2vec_results_cor
+    # intrans_results, trans_results, ellipsis_results = evaluate_all_models()
+    # max_res_intrans = get_max_results(intrans_results)
+    # max_res_trans = get_max_results(trans_results)
+    # max_res_ellipsis = get_max_results(ellipsis_results)
+    # for k in max_res_intrans.keys():
+    #     print(k, max_res_intrans[k])
+    # for k in max_res_trans.keys():
+    #     print(k, max_res_trans[k])
+    # for k in max_res_ellipsis.keys():
+    #     print(k, max_res_ellipsis[k])

@@ -8,7 +8,8 @@ from tensorskipgram.evaluation.composers \
             ell_copy_object_sum, ell_copy_object_mult, ell_frobenius_add_sum,
             ell_frobenius_add_mult, ell_frobenius_mult_sum, ell_frobenius_mult_mult,
             ell_copy_subject_sum_sum, ell_copy_object_sum_sum,
-            ell_copy_subject_sum_mult, ell_copy_object_sum_mult)
+            ell_copy_subject_sum_mult, ell_copy_object_sum_mult,
+            normal_models, cogebraa_models, cogebrab_models, cofree_models)
 from tensorskipgram.evaluation.spaces import VectorSpace, MatrixSpace
 from tensorskipgram.evaluation.composition_models \
     import (CompositionModel, CompositionModelEarly, CompositionModelMid,
@@ -16,17 +17,40 @@ from tensorskipgram.evaluation.composition_models \
             IntransitiveModelEarly, TransitiveModelEarly, EllipsisModelEarly,
             IntransitiveModelMid, TransitiveModelMid, EllipsisModelMid,
             TransitiveModelTwo, EllipsisModelTwo)
-from tensorskipgram.config import noun_space_fn, model_path_subj_conc, model_path_obj_conc
-from tensorskipgram.config import model_out_path_subj_gaps, model_out_path_obj_gaps
-from tensorskipgram.config import model_out_path_subj_gaps2, model_out_path_obj_gaps2
+from tensorskipgram.config import (noun_space_fn, model_path_subj_conc,
+                                   model_path_obj_conc, model_out_path_subj_gaps,
+                                   model_out_path_obj_gaps, model_out_path_subj_gaps2,
+                                   model_out_path_obj_gaps2, model_out_path_subj_gapss,
+                                   model_out_path_obj_gapss, relational_mats_out_fn,
+                                   bert_space_fn, bert_mats_out_fn,
+                                   glove_space_fn, glove_mats_fn,
+                                   fasttext_space_fn, fasttext_mats_fn,
+                                   word2vec_space_fn, word2vec_mats_fn)
+
 from tensorskipgram.evaluation.composition_models import ParagapsModel
 from tensorskipgram.evaluation.composers import paragaps_basic
-from tensorskipgram.config import model_out_path_subj_gapss, model_out_path_obj_gapss
 skipgram_space = VectorSpace(name="skipgram100", path=noun_space_fn)
-# skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_conc)
-# skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_conc)
+# rel_mats = MatrixSpace(name="rel_mat", path=relational_mats_out_fn)
+# bert_space = VectorSpace(name="bert", path=bert_space_fn)
+# rel_bert_mats = MatrixSpace(name="rel_bert_mat", path=bert_mats_out_fn)
+
+glove_space = VectorSpace(name="glove", path=glove_space_fn)
+glove_rel_mats = MatrixSpace(name="rel_glove_mat", path=glove_mats_fn)
+fasttext_space = VectorSpace(name="glove", path=fasttext_space_fn)
+fasttext_rel_mats = MatrixSpace(name="rel_glove_mat", path=fasttext_mats_fn)
+word2vec_space = VectorSpace(name="glove", path=word2vec_space_fn)
+word2vec_rel_mats = MatrixSpace(name="rel_glove_mat", path=word2vec_mats_fn)
+
+skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_path_subj_conc)
+skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_path_obj_conc)
 # skipgram_subj_mats = MatrixSpace(name="skipgram_subj_mat", path=model_out_path_subj_gaps2)
 # skipgram_obj_mats = MatrixSpace(name="skipgram_obj_mat", path=model_out_path_obj_gaps2)
+
+
+def make_concrete_model_base(name, model_class: CompositionModel, composer,
+                             vec_space: VectorSpace, mat_space: MatrixSpace):
+    return model_class(name, vec_space, mat_space, composer)
+
 
 def make_concrete_model(name, model_class: CompositionModel, composer, setting: str):
     assert setting in ['subj', 'obj']
@@ -348,3 +372,31 @@ ell_models_late = ell_models_late_sum + ell_models_late_mult
 
 paragaps_model_basic_subj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='subj')
 paragaps_model_basic_obj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='obj')
+# vec_space1, mat_space1 = skipgram_space, rel_mats
+# ell_copying_models1 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in normal_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebraa_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebrab_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cofree_models])
+#
+# vec_space2, mat_space2 = bert_space, rel_bert_mats
+# ell_copying_models2 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in normal_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebraa_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebrab_models] +
+#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cofree_models])
+
+vec_space3, mat_space3 = glove_space, glove_rel_mats
+ell_copying_models3 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space3, mat_space3) for (name, m) in normal_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space3, mat_space3) for (name, m) in cogebraa_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space3, mat_space3) for (name, m) in cogebrab_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space3, mat_space3) for (name, m) in cofree_models])
+
+vec_space4, mat_space4 = fasttext_space, fasttext_rel_mats
+ell_copying_models4 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space4, mat_space4) for (name, m) in normal_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space4, mat_space4) for (name, m) in cogebraa_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space4, mat_space4) for (name, m) in cogebrab_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space4, mat_space4) for (name, m) in cofree_models])
+vec_space5, mat_space5 = word2vec_space, word2vec_rel_mats
+ell_copying_models5 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space5, mat_space5) for (name, m) in normal_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space5, mat_space5) for (name, m) in cogebraa_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space5, mat_space5) for (name, m) in cogebrab_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space5, mat_space5) for (name, m) in cofree_models])

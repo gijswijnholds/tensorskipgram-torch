@@ -38,17 +38,12 @@ We publish the models of our proposed method, which are a pair of matrix represe
 We do *not* provide the verb cube model or the ablation matrix model, as they underperform and are too large to reasonably store online.
 
 | Model Name      | Dimensions | Link to Embeddings        |
-| --------------- |:----------:| :----------------------:  |
+| --------------- |:----------:| :-----------------------: |
 | Noun (skipgram) | 100        | [link][skipgram_vectors]  |
-| *Mat* x Subj    | 100x100    | [link][mat_subj_matrices] |
-| *Mat* x Obj     | 100x100    | [link][mat_obj_matrices]  |
-| Relational      | 100x100    | [link][rel_matrices]      |
-| Kronecker       | 100x100    | [link][kron_matrices]     |
-[skipgram_vectors]: https://ln2.sync.com/dl/9fbd93010/dd7rbij3-7vb8zkh2-87xf8mwk-wb9xvta6
-[mat_subj_matrices]: https://ln2.sync.com/dl/dcafc01e0/2fvmq7tb-d2e6nnn7-7vnhviya-99kkb4bx
-[mat_obj_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b
-[rel_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b
-[kron_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b
+| *Mat* x Subj | 100x100    | [link][mat_subj_matrices] |
+| *Mat* x Obj | 100x100    | [link][mat_obj_matrices]  |
+| Relational | 100x100    | [link][rel_matrices]      |
+| Kronecker | 100x100    | [link][kron_matrices]     |
 
 
 ## Evaluation Results
@@ -66,3 +61,10 @@ We display the results that we obtain on multiple evaluation datasets in the tab
 | ELLSIM    |     0.76     |      0.43       |
 
 On SICK-R, we achieve a Pearson correlation score of 0.70.
+
+
+[skipgram_vectors]: https://ln2.sync.com/dl/9fbd93010/dd7rbij3-7vb8zkh2-87xf8mwk-wb9xvta6
+[mat_subj_matrices]: https://ln2.sync.com/dl/dcafc01e0/2fvmq7tb-d2e6nnn7-7vnhviya-99kkb4bx
+[mat_obj_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b
+[rel_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b
+[kron_matrices]: https://ln2.sync.com/dl/cc5276da0/gphdbdp4-tkwem5ci-f3mg5fvk-at6r2h9b

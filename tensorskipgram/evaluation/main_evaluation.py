@@ -5,14 +5,15 @@ from tensorskipgram.tasks.datasets import create_paragaps
 from tensorskipgram.config import paragaps_path
 from tensorskipgram.tasks.datasets \
     import (create_ml2008, create_ml2010, create_gs2011, create_ks2013,
-            create_ks2014, create_elldis, create_ellsim)
+            create_ks2014, create_elldis, create_ellsim, create_elldis_dis)
 from tensorskipgram.evaluation.concrete_models \
     import (cat_intrans_models_early, cat_intrans_models_mid, intrans_models_late,
             trans_models_early, trans_models_mid, trans_models_two, trans_models_late,
             ell_models_early, ell_models_mid, ell_models_late, alphas,
+            ell_copying_models1, ell_copying_models2,
             ell_copying_models3, ell_copying_models4, ell_copying_models5)
 from tensorskipgram.evaluation.evaluator \
-    import (evaluate_model_on_task, evaluate_model_on_task_late_fusion)
+    import (evaluate_model_on_task, evaluate_model_on_task_late_fusion, evaluate_model_on_disambiguation_task)
 from tensorskipgram.config import (ml2008_path, ml2010_path, gs2011_path, ks2013_path,
                                    ks2014_path, elldis_path, ellsim_path)
 # from tensorskipgram.evaluation.concrete_models \
@@ -74,6 +75,13 @@ def evaluate_ellipsis_models(models) -> None:
     #                                       for (n, m1, m2) in tqdm(ell_models_late) for a in alphas}
     return result_dict
 
+def evaluate_ellipsis_disambiguation_models(models) -> None:
+    elldis_dis = create_elldis_dis(elldis_path)
+    ell_models = models  # ell_copying_models3
+    result_dict = {}
+    result_dict[elldis_dis.name] = {m.name: evaluate_model_on_disambiguation_task(m, elldis_dis, strict=False) for m in tqdm(ell_models)}
+    return result_dict
+
 
 def evaluate_all_models() -> None:
     """Load all tasks, and models, and compute spearman correlations."""
@@ -90,13 +98,19 @@ def get_max_results(result_dict: Dict) -> Dict:
 
 def main() -> None:
     """Run all experiments on all tasks, and print the best results."""
-    glove_results = evaluate_ellipsis_models(ell_copying_models3)
-    glove_results_cor = {k: {i: glove_results[k][i][0] for i in glove_results[k]} for k in glove_results}
-    fasttext_results = evaluate_ellipsis_models(ell_copying_models4)
-    fasttext_results_cor = {k: {i: fasttext_results[k][i][0] for i in fasttext_results[k]} for k in fasttext_results}
-    word2vec_results = evaluate_ellipsis_models(ell_copying_models5)
-    word2vec_results_cor = {k: {i: word2vec_results[k][i][0] for i in word2vec_results[k]} for k in word2vec_results}
-    return glove_results_cor, fasttext_results_cor, word2vec_results_cor
+    # glove_results = evaluate_ellipsis_models(ell_copying_models3)
+    # glove_results_cor = {k: {i: glove_results[k][i][0] for i in glove_results[k]} for k in glove_results}
+    # fasttext_results = evaluate_ellipsis_models(ell_copying_models4)
+    # fasttext_results_cor = {k: {i: fasttext_results[k][i][0] for i in fasttext_results[k]} for k in fasttext_results}
+    # word2vec_results = evaluate_ellipsis_models(ell_copying_models5)
+    # word2vec_results_cor = {k: {i: word2vec_results[k][i][0] for i in word2vec_results[k]} for k in word2vec_results}
+    rel_dis_results = evaluate_ellipsis_disambiguation_models(ell_copying_models1)
+    bert_dis_results = evaluate_ellipsis_disambiguation_models(ell_copying_models2)
+    glove_dis_results = evaluate_ellipsis_disambiguation_models(ell_copying_models3)
+    fasttext_dis_results = evaluate_ellipsis_disambiguation_models(ell_copying_models4)
+    word2vec_dis_results = evaluate_ellipsis_disambiguation_models(ell_copying_models5)
+    return rel_dis_results, bert_dis_results, glove_dis_results, fasttext_dis_results, word2vec_dis_results
+    # return glove_results_cor, fasttext_results_cor, word2vec_results_cor
     # intrans_results, trans_results, ellipsis_results = evaluate_all_models()
     # max_res_intrans = get_max_results(intrans_results)
     # max_res_trans = get_max_results(trans_results)

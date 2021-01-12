@@ -6,7 +6,7 @@ from tensorskipgram.tasks.task import (Tag, WordTag, SimilaritySample,
 from tensorskipgram.tasks.util import paragaps_noun_map, paragaps_verb_map
 import numpy as np
 from typing import List, Callable
-
+from collections import defaultdict
 
 def get_wordsim_nouns(s1, s2) -> List[str]:
     return [s1, s2]
@@ -346,6 +346,22 @@ def create_elldis(elldis_path: str = 'WS2018/ELLDIS_CORRECTED.txt') -> ELLDIS:
     data = load_ellipsis_sentence_data(elldis_path, '\t', process_line_elldis)
     return ELLDIS(name, data, get_ellipsis_nouns, get_ellipsis_verbs)
 
+
+def create_elldis_dis(elldis_path: str = 'WS2018/ELLDIS_CORRECTED.txt') -> ELLDISDis:
+    elldis_base = create_elldis(elldis_path)
+    name = "ELLDISDis"
+    data_dict = {}
+    for (s1, s2, sc) in elldis_base.data:
+        data_dict.setdefault(s1, []).append((s2, sc))
+    data_dict = {d: data_dict[d] for d in data_dict if len(data_dict[d]) == 2}
+    data = []
+    for s1 in data_dict:
+        (s2, sc2), (s3, sc3) = data_dict[s1]
+        if sc2 > sc3:
+            data.append((s1, s2, s3))
+        elif sc3 > sc2:
+            data.append((s1, s3, s2))
+    return ELLDISDis(name, data, get_ellipsis_nouns, get_ellipsis_verbs)
 
 class ELLSIM(SimilarityTask):
     pass

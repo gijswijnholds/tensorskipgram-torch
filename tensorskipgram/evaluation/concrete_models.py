@@ -30,9 +30,9 @@ from tensorskipgram.config import (noun_space_fn, model_path_subj_conc,
 from tensorskipgram.evaluation.composition_models import ParagapsModel
 from tensorskipgram.evaluation.composers import paragaps_basic
 skipgram_space = VectorSpace(name="skipgram100", path=noun_space_fn)
-# rel_mats = MatrixSpace(name="rel_mat", path=relational_mats_out_fn)
-# bert_space = VectorSpace(name="bert", path=bert_space_fn)
-# rel_bert_mats = MatrixSpace(name="rel_bert_mat", path=bert_mats_out_fn)
+rel_mats = MatrixSpace(name="rel_mat", path=relational_mats_out_fn)
+bert_space = VectorSpace(name="bert", path=bert_space_fn)
+rel_bert_mats = MatrixSpace(name="rel_bert_mat", path=bert_mats_out_fn)
 
 glove_space = VectorSpace(name="glove", path=glove_space_fn)
 glove_rel_mats = MatrixSpace(name="rel_glove_mat", path=glove_mats_fn)
@@ -372,17 +372,17 @@ ell_models_late = ell_models_late_sum + ell_models_late_mult
 
 paragaps_model_basic_subj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='subj')
 paragaps_model_basic_obj = make_concrete_model("basic", ParagapsModel, paragaps_basic, setting='obj')
-# vec_space1, mat_space1 = skipgram_space, rel_mats
-# ell_copying_models1 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in normal_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebraa_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebrab_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cofree_models])
-#
-# vec_space2, mat_space2 = bert_space, rel_bert_mats
-# ell_copying_models2 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in normal_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebraa_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebrab_models] +
-#                       [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cofree_models])
+vec_space1, mat_space1 = skipgram_space, rel_mats
+ell_copying_models1 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in normal_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebraa_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cogebrab_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space1, mat_space1) for (name, m) in cofree_models])
+
+vec_space2, mat_space2 = bert_space, rel_bert_mats
+ell_copying_models2 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in normal_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebraa_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cogebrab_models] +
+                      [make_concrete_model_base(name, EllipsisModel, m, vec_space2, mat_space2) for (name, m) in cofree_models])
 
 vec_space3, mat_space3 = glove_space, glove_rel_mats
 ell_copying_models3 = ([make_concrete_model_base(name, EllipsisModel, m, vec_space3, mat_space3) for (name, m) in normal_models] +

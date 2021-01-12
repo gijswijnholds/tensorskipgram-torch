@@ -33,7 +33,7 @@ class Task(Generic[Sample]):
 
 WordSimilaritySample = Tuple[str, str, float]
 SimilaritySample = Tuple[List[str], List[str], float]
-ClassSample = Tuple[List[str], List[str], int]
+ClassSample = Tuple[List[str], List[str], List[str]]
 
 WordSimilarityTask = Task[WordSimilaritySample]
 SimilarityTask = Task[SimilaritySample]
